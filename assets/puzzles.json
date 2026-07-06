@@ -1,0 +1,302 @@
+[
+  {
+    "id": "puzzle_01",
+    "date": "2026-07-01",
+    "groups": [
+      {"id": "g1_01", "category": "Chemical Elements", "words": ["GOLD", "IRON", "ZINC", "NEON"], "difficulty": 1},
+      {"id": "g2_01", "category": "Planets", "words": ["MARS", "VENUS", "SATURN", "URANUS"], "difficulty": 2},
+      {"id": "g3_01", "category": "Famous Scientists", "words": ["NEWTON", "DARWIN", "CURIE", "TESLA"], "difficulty": 3},
+      {"id": "g4_01", "category": "Subatomic Particles", "words": ["QUARK", "BOSON", "LEPTON", "PHOTON"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_02",
+    "date": "2026-07-02",
+    "groups": [
+      {"id": "g1_02", "category": "Types of Trees", "words": ["OAK", "PINE", "MAPLE", "BIRCH"], "difficulty": 1},
+      {"id": "g2_02", "category": "Big Cats", "words": ["LION", "TIGER", "CHEETAH", "JAGUAR"], "difficulty": 2},
+      {"id": "g3_02", "category": "Precious Gems", "words": ["RUBY", "SAPPHIRE", "EMERALD", "OPAL"], "difficulty": 3},
+      {"id": "g4_02", "category": "___berry", "words": ["BLUE", "STRAW", "GOOSE", "ELDER"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_03",
+    "date": "2026-07-03",
+    "groups": [
+      {"id": "g1_03", "category": "Italian Dishes", "words": ["PIZZA", "PASTA", "RISOTTO", "TIRAMISU"], "difficulty": 1},
+      {"id": "g2_03", "category": "Cooking Methods", "words": ["BAKE", "GRILL", "STEAM", "POACH"], "difficulty": 2},
+      {"id": "g3_03", "category": "Kitchen Herbs", "words": ["BASIL", "THYME", "CUMIN", "SAFFRON"], "difficulty": 3},
+      {"id": "g4_03", "category": "___ sauce", "words": ["SOY", "HOT", "APPLE", "TARTAR"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_04",
+    "date": "2026-07-04",
+    "groups": [
+      {"id": "g1_04", "category": "Musical Instruments", "words": ["PIANO", "GUITAR", "DRUM", "FLUTE"], "difficulty": 1},
+      {"id": "g2_04", "category": "Music Genres", "words": ["JAZZ", "BLUES", "REGGAE", "SALSA"], "difficulty": 2},
+      {"id": "g3_04", "category": "Beatles Members", "words": ["JOHN", "PAUL", "GEORGE", "RINGO"], "difficulty": 3},
+      {"id": "g4_04", "category": "Music Theory Terms", "words": ["TEMPO", "CHORD", "SCALE", "RIFF"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_05",
+    "date": "2026-07-05",
+    "groups": [
+      {"id": "g1_05", "category": "Ball Sports", "words": ["TENNIS", "CRICKET", "HOCKEY", "RUGBY"], "difficulty": 1},
+      {"id": "g2_05", "category": "Olympic Field Events", "words": ["HURDLES", "JAVELIN", "DISCUS", "VAULT"], "difficulty": 2},
+      {"id": "g3_05", "category": "Famous Sports Teams", "words": ["LAKERS", "YANKEES", "CELTICS", "RANGERS"], "difficulty": 3},
+      {"id": "g4_05", "category": "___ball", "words": ["BASKET", "FOOT", "VOLLEY", "HAND"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_06",
+    "date": "2026-07-06",
+    "groups": [
+      {"id": "g1_06", "category": "Animated Movies", "words": ["SHREK", "FROZEN", "COCO", "MULAN"], "difficulty": 1},
+      {"id": "g2_06", "category": "Horror Films", "words": ["JAWS", "SCREAM", "IT", "ALIEN"], "difficulty": 2},
+      {"id": "g3_06", "category": "Classic Sitcoms", "words": ["FRIENDS", "SEINFELD", "FRASIER", "CHEERS"], "difficulty": 3},
+      {"id": "g4_06", "category": "Sci-Fi Films", "words": ["ARRIVAL", "GRAVITY", "INCEPTION", "DUNE"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_07",
+    "date": "2026-07-07",
+    "groups": [
+      {"id": "g1_07", "category": "Roman Emperors", "words": ["CAESAR", "NERO", "AUGUSTUS", "CALIGULA"], "difficulty": 1},
+      {"id": "g2_07", "category": "___ War", "words": ["TROJAN", "CRIMEAN", "PUNIC", "BOER"], "difficulty": 2},
+      {"id": "g3_07", "category": "Ancient Civilizations", "words": ["MAYAN", "AZTEC", "INCA", "SUMERIAN"], "difficulty": 3},
+      {"id": "g4_07", "category": "Famous Revolutions", "words": ["FRENCH", "AMERICAN", "RUSSIAN", "INDUSTRIAL"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_08",
+    "date": "2026-07-08",
+    "groups": [
+      {"id": "g1_08", "category": "Shakespeare Plays", "words": ["HAMLET", "OTHELLO", "MACBETH", "TEMPEST"], "difficulty": 1},
+      {"id": "g2_08", "category": "Classic Authors", "words": ["DICKENS", "TOLSTOY", "AUSTEN", "TWAIN"], "difficulty": 2},
+      {"id": "g3_08", "category": "Harry Potter Characters", "words": ["HARRY", "HERMIONE", "RON", "DRACO"], "difficulty": 3},
+      {"id": "g4_08", "category": "Book Genres", "words": ["THRILLER", "MYSTERY", "ROMANCE", "SATIRE"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_09",
+    "date": "2026-07-09",
+    "groups": [
+      {"id": "g1_09", "category": "African Countries", "words": ["KENYA", "GHANA", "MALI", "TOGO"], "difficulty": 1},
+      {"id": "g2_09", "category": "Mountain Ranges", "words": ["ALPS", "ANDES", "URALS", "ATLAS"], "difficulty": 2},
+      {"id": "g3_09", "category": "Famous Rivers", "words": ["NILE", "AMAZON", "GANGES", "THAMES"], "difficulty": 3},
+      {"id": "g4_09", "category": "Capital Cities", "words": ["OTTAWA", "CANBERRA", "OSLO", "LIMA"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_10",
+    "date": "2026-07-10",
+    "groups": [
+      {"id": "g1_10", "category": "Programming Languages", "words": ["PYTHON", "JAVA", "SWIFT", "RUBY"], "difficulty": 1},
+      {"id": "g2_10", "category": "Tech Giants", "words": ["APPLE", "GOOGLE", "AMAZON", "META"], "difficulty": 2},
+      {"id": "g3_10", "category": "Network Protocols", "words": ["HTTP", "FTP", "SSH", "SMTP"], "difficulty": 3},
+      {"id": "g4_10", "category": "Data Structures", "words": ["STACK", "QUEUE", "TREE", "HEAP"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_11",
+    "date": "2026-07-11",
+    "groups": [
+      {"id": "g1_11", "category": "Art Movements", "words": ["CUBISM", "BAROQUE", "GOTHIC", "REALISM"], "difficulty": 1},
+      {"id": "g2_11", "category": "Famous Painters", "words": ["MONET", "PICASSO", "DALI", "WARHOL"], "difficulty": 2},
+      {"id": "g3_11", "category": "Shades of Red", "words": ["CRIMSON", "SCARLET", "MAROON", "VERMILLION"], "difficulty": 3},
+      {"id": "g4_11", "category": "Art Tools", "words": ["CANVAS", "EASEL", "PALETTE", "CHISEL"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_12",
+    "date": "2026-07-12",
+    "groups": [
+      {"id": "g1_12", "category": "Greek Gods", "words": ["ZEUS", "HERA", "APOLLO", "ATHENA"], "difficulty": 1},
+      {"id": "g2_12", "category": "Norse Gods", "words": ["ODIN", "THOR", "LOKI", "FREYA"], "difficulty": 2},
+      {"id": "g3_12", "category": "Mythical Creatures", "words": ["PHOENIX", "GRIFFIN", "MINOTAUR", "CENTAUR"], "difficulty": 3},
+      {"id": "g4_12", "category": "Greek Heroes", "words": ["ACHILLES", "ODYSSEUS", "HERCULES", "PERSEUS"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_13",
+    "date": "2026-07-13",
+    "groups": [
+      {"id": "g1_13", "category": "Synonyms for Happy", "words": ["GLAD", "JOLLY", "MERRY", "ELATED"], "difficulty": 1},
+      {"id": "g2_13", "category": "Words Meaning Large", "words": ["VAST", "HUGE", "MAMMOTH", "COLOSSAL"], "difficulty": 2},
+      {"id": "g3_13", "category": "Palindromes", "words": ["LEVEL", "RADAR", "CIVIC", "KAYAK"], "difficulty": 3},
+      {"id": "g4_13", "category": "Portmanteau Words", "words": ["BRUNCH", "SMOG", "MOTEL", "VLOG"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_14",
+    "date": "2026-07-14",
+    "groups": [
+      {"id": "g1_14", "category": "Australian Animals", "words": ["KOALA", "WOMBAT", "QUOKKA", "ECHIDNA"], "difficulty": 1},
+      {"id": "g2_14", "category": "Birds of Prey", "words": ["EAGLE", "FALCON", "HAWK", "OSPREY"], "difficulty": 2},
+      {"id": "g3_14", "category": "Deep Sea Creatures", "words": ["NARWHAL", "DUGONG", "CUTTLEFISH", "ANGLERFISH"], "difficulty": 3},
+      {"id": "g4_14", "category": "Endangered Animals", "words": ["VAQUITA", "KAKAPO", "AXOLOTL", "SAOLA"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_15",
+    "date": "2026-07-15",
+    "groups": [
+      {"id": "g1_15", "category": "Shades of Blue", "words": ["COBALT", "AZURE", "CYAN", "TEAL"], "difficulty": 1},
+      {"id": "g2_15", "category": "Shades of Green", "words": ["OLIVE", "SAGE", "JADE", "CHARTREUSE"], "difficulty": 2},
+      {"id": "g3_15", "category": "Shades of Purple", "words": ["VIOLET", "LAVENDER", "LILAC", "INDIGO"], "difficulty": 3},
+      {"id": "g4_15", "category": "Shades of Pink", "words": ["BLUSH", "FUCHSIA", "ROSE", "MAGENTA"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_16",
+    "date": "2026-07-16",
+    "groups": [
+      {"id": "g1_16", "category": "Medical Professionals", "words": ["SURGEON", "NURSE", "MIDWIFE", "PARAMEDIC"], "difficulty": 1},
+      {"id": "g2_16", "category": "Creative Professionals", "words": ["SCULPTOR", "DIRECTOR", "COMPOSER", "LYRICIST"], "difficulty": 2},
+      {"id": "g3_16", "category": "Legal Professions", "words": ["JUDGE", "BARRISTER", "CLERK", "BAILIFF"], "difficulty": 3},
+      {"id": "g4_16", "category": "Medieval Occupations", "words": ["MASON", "TANNER", "WEAVER", "FLETCHER"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_17",
+    "date": "2026-07-17",
+    "groups": [
+      {"id": "g1_17", "category": "Luxury Brands", "words": ["GUCCI", "PRADA", "CHANEL", "VERSACE"], "difficulty": 1},
+      {"id": "g2_17", "category": "Types of Fabric", "words": ["SILK", "DENIM", "VELVET", "LINEN"], "difficulty": 2},
+      {"id": "g3_17", "category": "Fashion Accessories", "words": ["BROOCH", "BANGLE", "TIARA", "CRAVAT"], "difficulty": 3},
+      {"id": "g4_17", "category": "Fashion Capitals", "words": ["PARIS", "MILAN", "TOKYO", "ANTWERP"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_18",
+    "date": "2026-07-18",
+    "groups": [
+      {"id": "g1_18", "category": "Card Games", "words": ["POKER", "BRIDGE", "RUMMY", "SNAP"], "difficulty": 1},
+      {"id": "g2_18", "category": "Board Games", "words": ["CHESS", "MONOPOLY", "CLUEDO", "SCRABBLE"], "difficulty": 2},
+      {"id": "g3_18", "category": "Video Game Franchises", "words": ["ZELDA", "MARIO", "SONIC", "HALO"], "difficulty": 3},
+      {"id": "g4_18", "category": "Gambling Terms", "words": ["JACKPOT", "ANTE", "BLUFF", "FOLD"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_19",
+    "date": "2026-07-19",
+    "groups": [
+      {"id": "g1_19", "category": "Geometric Shapes", "words": ["RHOMBUS", "PENTAGON", "ELLIPSE", "TRAPEZOID"], "difficulty": 1},
+      {"id": "g2_19", "category": "Types of Numbers", "words": ["PRIME", "INTEGER", "RATIONAL", "IRRATIONAL"], "difficulty": 2},
+      {"id": "g3_19", "category": "Famous Mathematicians", "words": ["EULER", "GAUSS", "FERMAT", "TURING"], "difficulty": 3},
+      {"id": "g4_19", "category": "Math Operations", "words": ["SUM", "PRODUCT", "QUOTIENT", "REMAINDER"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_20",
+    "date": "2026-07-20",
+    "groups": [
+      {"id": "g1_20", "category": "Architectural Styles", "words": ["GOTHIC", "BAROQUE", "BRUTALIST", "ROMANESQUE"], "difficulty": 1},
+      {"id": "g2_20", "category": "Building Features", "words": ["FACADE", "ATRIUM", "PARAPET", "TURRET"], "difficulty": 2},
+      {"id": "g3_20", "category": "Famous Architects", "words": ["GAUDI", "WRIGHT", "GEHRY", "MIES"], "difficulty": 3},
+      {"id": "g4_20", "category": "Bridge Types", "words": ["ARCH", "CABLE", "TRUSS", "BEAM"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_21",
+    "date": "2026-07-21",
+    "groups": [
+      {"id": "g1_21", "category": "Cloud Types", "words": ["CUMULUS", "STRATUS", "CIRRUS", "NIMBUS"], "difficulty": 1},
+      {"id": "g2_21", "category": "Severe Weather", "words": ["TORNADO", "BLIZZARD", "MONSOON", "TYPHOON"], "difficulty": 2},
+      {"id": "g3_21", "category": "Temperature Scales", "words": ["CELSIUS", "KELVIN", "FAHRENHEIT", "RANKINE"], "difficulty": 3},
+      {"id": "g4_21", "category": "___ storm", "words": ["BRAIN", "ICE", "FIRE", "THUNDER"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_22",
+    "date": "2026-07-22",
+    "groups": [
+      {"id": "g1_22", "category": "Dances", "words": ["WALTZ", "TANGO", "FOXTROT", "RUMBA"], "difficulty": 1},
+      {"id": "g2_22", "category": "Streaming Services", "words": ["NETFLIX", "HULU", "DISNEY", "HBO"], "difficulty": 2},
+      {"id": "g3_22", "category": "Social Media Terms", "words": ["HASHTAG", "CAPTION", "FILTER", "ALGORITHM"], "difficulty": 3},
+      {"id": "g4_22", "category": "Internet Slang", "words": ["YOLO", "FOMO", "GOAT", "FLEX"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_23",
+    "date": "2026-07-23",
+    "groups": [
+      {"id": "g1_23", "category": "Types of Government", "words": ["MONARCHY", "REPUBLIC", "DEMOCRACY", "THEOCRACY"], "difficulty": 1},
+      {"id": "g2_23", "category": "Historic Leaders", "words": ["CLEOPATRA", "NAPOLEON", "GANDHI", "MANDELA"], "difficulty": 2},
+      {"id": "g3_23", "category": "Royal Titles", "words": ["DUKE", "EARL", "VISCOUNT", "MARQUESS"], "difficulty": 3},
+      {"id": "g4_23", "category": "Political Terms", "words": ["VETO", "FILIBUSTER", "CAUCUS", "REFERENDUM"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_24",
+    "date": "2026-07-24",
+    "groups": [
+      {"id": "g1_24", "category": "Earth's Oceans", "words": ["PACIFIC", "ATLANTIC", "INDIAN", "ARCTIC"], "difficulty": 1},
+      {"id": "g2_24", "category": "Water Bodies", "words": ["LAGOON", "FJORD", "ESTUARY", "BAYOU"], "difficulty": 2},
+      {"id": "g3_24", "category": "Sea Invertebrates", "words": ["JELLYFISH", "STARFISH", "URCHIN", "BARNACLE"], "difficulty": 3},
+      {"id": "g4_24", "category": "Nautical Terms", "words": ["STARBOARD", "PORT", "HELM", "KEEL"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_25",
+    "date": "2026-07-25",
+    "groups": [
+      {"id": "g1_25", "category": "Programming Languages", "words": ["PYTHON", "RUST", "KOTLIN", "SCALA"], "difficulty": 1},
+      {"id": "g2_25", "category": "Design Patterns", "words": ["SINGLETON", "FACTORY", "OBSERVER", "ADAPTER"], "difficulty": 2},
+      {"id": "g3_25", "category": "Git Commands", "words": ["COMMIT", "BRANCH", "MERGE", "REBASE"], "difficulty": 3},
+      {"id": "g4_25", "category": "Primitive Data Types", "words": ["BOOLEAN", "INTEGER", "STRING", "FLOAT"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_26",
+    "date": "2026-07-26",
+    "groups": [
+      {"id": "g1_26", "category": "Months with 31 Days", "words": ["MARCH", "JULY", "OCTOBER", "DECEMBER"], "difficulty": 1},
+      {"id": "g2_26", "category": "Days Named After Norse Gods", "words": ["TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"], "difficulty": 2},
+      {"id": "g3_26", "category": "Units of Time", "words": ["MILLENNIUM", "CENTURY", "DECADE", "FORTNIGHT"], "difficulty": 3},
+      {"id": "g4_26", "category": "Calendar Systems", "words": ["GREGORIAN", "JULIAN", "HEBREW", "ISLAMIC"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_27",
+    "date": "2026-07-27",
+    "groups": [
+      {"id": "g1_27", "category": "B Vitamins", "words": ["RIBOFLAVIN", "THIAMINE", "NIACIN", "BIOTIN"], "difficulty": 1},
+      {"id": "g2_27", "category": "Medical Imaging", "words": ["MRI", "CT", "XRAY", "ULTRASOUND"], "difficulty": 2},
+      {"id": "g3_27", "category": "Human Bones", "words": ["FEMUR", "TIBIA", "RADIUS", "CLAVICLE"], "difficulty": 3},
+      {"id": "g4_27", "category": "Diseases Named After People", "words": ["PARKINSON", "ALZHEIMER", "CROHN", "HODGKIN"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_28",
+    "date": "2026-07-28",
+    "groups": [
+      {"id": "g1_28", "category": "Strong Emotions", "words": ["EUPHORIA", "MELANCHOLY", "NOSTALGIA", "ANXIETY"], "difficulty": 1},
+      {"id": "g2_28", "category": "Cognitive Biases", "words": ["ANCHORING", "HINDSIGHT", "CONFIRMATION", "HALO"], "difficulty": 2},
+      {"id": "g3_28", "category": "Famous Psychologists", "words": ["FREUD", "JUNG", "PAVLOV", "SKINNER"], "difficulty": 3},
+      {"id": "g4_28", "category": "Common Phobias", "words": ["SPIDERS", "HEIGHTS", "CLOWNS", "DARKNESS"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_29",
+    "date": "2026-07-29",
+    "groups": [
+      {"id": "g1_29", "category": "Aircraft Types", "words": ["BIPLANE", "HELICOPTER", "GLIDER", "ZEPPELIN"], "difficulty": 1},
+      {"id": "g2_29", "category": "Train Types", "words": ["MONORAIL", "MAGLEV", "METRO", "TRAM"], "difficulty": 2},
+      {"id": "g3_29", "category": "Famous Ships", "words": ["TITANIC", "MAYFLOWER", "BISMARCK", "ENDEAVOUR"], "difficulty": 3},
+      {"id": "g4_29", "category": "Luxury Car Brands", "words": ["FERRARI", "PORSCHE", "MASERATI", "BUGATTI"], "difficulty": 4}
+    ]
+  },
+  {
+    "id": "puzzle_30",
+    "date": "2026-07-30",
+    "groups": [
+      {"id": "g1_30", "category": "Black and White Animals", "words": ["ZEBRA", "PANDA", "PENGUIN", "MAGPIE"], "difficulty": 1},
+      {"id": "g2_30", "category": "Famous Johns", "words": ["LENNON", "KEATS", "STEINBECK", "GRISHAM"], "difficulty": 2},
+      {"id": "g3_30", "category": "Things You Blow", "words": ["WHISTLE", "CANDLE", "BUBBLE", "TRUMPET"], "difficulty": 3},
+      {"id": "g4_30", "category": "Words with Silent Letters", "words": ["KNIGHT", "GNOME", "WRENCH", "PSALM"], "difficulty": 4}
+    ]
+  }
+]

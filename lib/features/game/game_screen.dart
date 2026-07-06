@@ -1,0 +1,351 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/theme.dart';
+import '../../data/models/puzzle.dart';
+import '../../data/services/streak_service.dart';
+import 'game_notifier.dart';
+import 'group_reveal_row.dart';
+import 'word_tile.dart';
+
+class GameScreen extends ConsumerStatefulWidget {
+  const GameScreen({super.key, required this.puzzle});
+
+  final Puzzle puzzle;
+
+  @override
+  ConsumerState<GameScreen> createState() => _GameScreenState();
+}
+
+class _GameScreenState extends ConsumerState<GameScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load puzzle on first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(gameProvider.notifier).loadPuzzle(widget.puzzle);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final gameState = ref.watch(gameProvider);
+
+    // ── Navigate on terminal state ──────────────────────────────────────────
+    ref.listen<GameState>(gameProvider, (prev, next) async {
+      final wasTerminal = prev?.phase == GamePhase.solved ||
+          prev?.phase == GamePhase.failed;
+      final isTerminal =
+          next.phase == GamePhase.solved || next.phase == GamePhase.failed;
+
+      if (!wasTerminal && isTerminal) {
+        // Record streak
+        await StreakService.instance.markPuzzlePlayed(
+          widget.puzzle.id,
+          won: next.phase == GamePhase.solved,
+        );
+
+        // Small delay so the last reveal animation is visible
+        await Future<void>.delayed(const Duration(milliseconds: 600));
+
+        if (mounted) {
+          final result =
+              ref.read(gameProvider.notifier).buildResult();
+          context.go('/results', extra: result);
+        }
+      }
+    });
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _TopBar(
+              puzzleDate: widget.puzzle.date,
+              mistakeCount: gameState.mistakeCount,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    // Instruction
+                    Text(
+                      'Find four groups of four',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.onSurface,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+
+                    // One-away banner
+                    if (gameState.isOneAway)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.diff3.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppColors.diff3.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: const Text(
+                            '🔥 One away!',
+                            style: TextStyle(
+                              color: AppColors.diff3,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    const SizedBox(height: 12),
+
+                    // Revealed group rows
+                    ...gameState.revealedGroups.map(
+                      (g) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: GroupRevealRow(key: ValueKey(g.id), group: g),
+                      ),
+                    ),
+
+                    // 4×4 word tile grid
+                    if (gameState.remainingWords.isNotEmpty)
+                      _WordGrid(gameState: gameState),
+
+                    const SizedBox(height: 16),
+
+                    // Progress bar
+                    _ProgressBar(groupsFound: gameState.groupsFound),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+
+            // Bottom action row
+            _BottomBar(gameState: gameState),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Top bar ──────────────────────────────────────────────────────────────────
+
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.puzzleDate, required this.mistakeCount});
+
+  final String puzzleDate;
+  final int mistakeCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Row(
+        children: [
+          // Back button
+          GestureDetector(
+            onTap: () => context.go('/home'),
+            child: const Icon(Icons.arrow_back_ios_new_rounded,
+                color: AppColors.onSurface, size: 20),
+          ),
+          const SizedBox(width: 12),
+          // Puzzle label
+          Expanded(
+            child: Text(
+              'CLUSTER',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.onBackground,
+                    letterSpacing: 3,
+                    fontWeight: FontWeight.w900,
+                  ),
+            ),
+          ),
+          // Mistake dots
+          Row(
+            children: List.generate(4, (i) {
+              final used = i < mistakeCount;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: used
+                        ? AppColors.mistakeUsed
+                        : AppColors.mistakeEmpty,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Word grid ─────────────────────────────────────────────────────────────────
+
+class _WordGrid extends ConsumerWidget {
+  const _WordGrid({required this.gameState});
+
+  final GameState gameState;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(gameProvider.notifier);
+    final words = gameState.remainingWords;
+
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: words.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 1.05,
+      ),
+      itemBuilder: (context, index) {
+        final word = words[index];
+        final isSelected = gameState.selectedWords.contains(word);
+        final shake = gameState.shouldShake && isSelected;
+
+        return WordTile(
+          key: ValueKey(word),
+          word: word,
+          isSelected: isSelected,
+          shake: shake,
+          onTap: () {
+            notifier.toggleTile(word);
+          },
+        );
+      },
+    );
+  }
+}
+
+// ── Progress bar ─────────────────────────────────────────────────────────────
+
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({required this.groupsFound});
+
+  final int groupsFound;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '$groupsFound / 4 groups',
+              style: const TextStyle(
+                color: AppColors.onSurface,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              '${(groupsFound / 4 * 100).round()}%',
+              style: const TextStyle(
+                color: AppColors.onSurface,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: groupsFound / 4,
+            backgroundColor: AppColors.surfaceElevated,
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(AppColors.accent),
+            minHeight: 6,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Bottom action bar ─────────────────────────────────────────────────────────
+
+class _BottomBar extends ConsumerWidget {
+  const _BottomBar({required this.gameState});
+
+  final GameState gameState;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(gameProvider.notifier);
+    final canSubmit = gameState.canSubmit;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          top: BorderSide(color: AppColors.surfaceElevated, width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Hint button (Phase 2 placeholder)
+          Expanded(
+            flex: 1,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content:
+                        Text('💡 Hints powered by rewarded ads — coming in Phase 2'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.lightbulb_outline, size: 18),
+              label: const Text('Hint'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.onSurface,
+                side: const BorderSide(color: AppColors.surfaceElevated),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Submit button
+          Expanded(
+            flex: 3,
+            child: AnimatedOpacity(
+              opacity: canSubmit ? 1.0 : 0.4,
+              duration: const Duration(milliseconds: 200),
+              child: ElevatedButton(
+                onPressed: canSubmit ? notifier.submitGuess : null,
+                child: const Text('Submit'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
