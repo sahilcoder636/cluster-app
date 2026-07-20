@@ -2,19 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/ad_service.dart';
 import '../../core/theme.dart';
 import '../../data/repositories/puzzle_repository.dart';
 import '../../data/services/streak_service.dart';
 import '../game/game_notifier.dart';
+import '../premium/premium_notifier.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load banner only for free users; premium check is best-effort here.
+    final isPremium =
+        ref.read(premiumProvider).maybeWhen(data: (v) => v, orElse: () => false);
+    if (!isPremium) {
+      AdService.instance.loadBanner(onLoaded: () { if (mounted) setState(() {}); });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final todayAsync = ref.watch(todaysPuzzleProvider);
     final streak = StreakService.instance.getStreak();
     final todayLabel = _formatDate(DateTime.now());
+    final isPremium = ref.watch(premiumProvider).maybeWhen(data: (v) => v, orElse: () => false);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -143,8 +162,15 @@ class HomeScreen extends ConsumerWidget {
 
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-            // ── AdMob banner placeholder ───────────────────────────────────
-            const SliverToBoxAdapter(child: _AdBannerPlaceholder()),
+            // ── AdMob banner (free users only) ────────────────────────────
+            SliverToBoxAdapter(
+              child: isPremium
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: AdService.instance.bannerWidget(),
+                    ),
+            ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
           ],
@@ -167,6 +193,7 @@ class HomeScreen extends ConsumerWidget {
     return '$dayName, $monthName ${dt.day}';
   }
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-widgets
@@ -395,29 +422,4 @@ class _PackCard extends StatelessWidget {
   }
 }
 
-class _AdBannerPlaceholder extends StatelessWidget {
-  const _AdBannerPlaceholder();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 50,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.surfaceTile, width: 1),
-      ),
-      child: const Center(
-        child: Text(
-          '📢  AdMob Banner 320×50  —  Phase 2 placeholder',
-          style: TextStyle(
-            color: AppColors.onSurface,
-            fontSize: 11,
-            letterSpacing: 0.3,
-          ),
-        ),
-      ),
-    );
-  }
-}

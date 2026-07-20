@@ -48,6 +48,13 @@ dependencies:
   # Sharing
   share_plus: ^10.0.0
 
+  # Ads
+  google_mobile_ads: ^9.0.0
+
+  # In-app purchases via RevenueCat
+  purchases_flutter: ^9.0.0
+  purchases_ui_flutter: ^9.0.0
+
   # JSON serialization (runtime annotations)
   json_annotation: ^4.9.0
 

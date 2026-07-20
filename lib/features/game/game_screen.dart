@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/ad_service.dart';
 import '../../core/theme.dart';
 import '../../data/models/puzzle.dart';
 import '../../data/services/streak_service.dart';
+import '../premium/premium_notifier.dart';
 import 'game_notifier.dart';
 import 'group_reveal_row.dart';
 import 'word_tile.dart';
@@ -26,16 +28,27 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(gameProvider.notifier).loadPuzzle(widget.puzzle);
     });
+    // Preload ads for this session
+    AdService.instance.loadRewarded();
+    AdService.instance.loadInterstitial();
   }
 
   @override
   Widget build(BuildContext context) {
     final gameState = ref.watch(gameProvider);
 
+    // ── Auto-clear shake after animation ───────────────────────────────────
+    ref.listen<GameState>(gameProvider, (prev, next) async {
+      if (!(prev?.shouldShake ?? false) && next.shouldShake) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) ref.read(gameProvider.notifier).clearShake();
+      }
+    });
+
     // ── Navigate on terminal state ──────────────────────────────────────────
     ref.listen<GameState>(gameProvider, (prev, next) async {
-      final wasTerminal = prev?.phase == GamePhase.solved ||
-          prev?.phase == GamePhase.failed;
+      final wasTerminal =
+          prev?.phase == GamePhase.solved || prev?.phase == GamePhase.failed;
       final isTerminal =
           next.phase == GamePhase.solved || next.phase == GamePhase.failed;
 
@@ -50,8 +63,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         await Future<void>.delayed(const Duration(milliseconds: 600));
 
         if (mounted) {
-          final result =
-              ref.read(gameProvider.notifier).buildResult();
+          final result = ref.read(gameProvider.notifier).buildResult();
           context.go('/results', extra: result);
         }
       }
@@ -76,8 +88,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     Text(
                       'Find four groups of four',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.onSurface,
-                          ),
+                        color: AppColors.onSurface,
+                      ),
                     ),
                     const SizedBox(height: 4),
 
@@ -87,7 +99,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 6),
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.diff3.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(20),
@@ -157,8 +171,11 @@ class _TopBar extends StatelessWidget {
           // Back button
           GestureDetector(
             onTap: () => context.go('/home'),
-            child: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: AppColors.onSurface, size: 20),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: AppColors.onSurface,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           // Puzzle label
@@ -166,10 +183,10 @@ class _TopBar extends StatelessWidget {
             child: Text(
               'CLUSTER',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.onBackground,
-                    letterSpacing: 3,
-                    fontWeight: FontWeight.w900,
-                  ),
+                color: AppColors.onBackground,
+                letterSpacing: 3,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ),
           // Mistake dots
@@ -264,10 +281,7 @@ class _ProgressBar extends StatelessWidget {
             ),
             Text(
               '${(groupsFound / 4 * 100).round()}%',
-              style: const TextStyle(
-                color: AppColors.onSurface,
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: AppColors.onSurface, fontSize: 12),
             ),
           ],
         ),
@@ -277,8 +291,7 @@ class _ProgressBar extends StatelessWidget {
           child: LinearProgressIndicator(
             value: groupsFound / 4,
             backgroundColor: AppColors.surfaceElevated,
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(AppColors.accent),
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
             minHeight: 6,
           ),
         ),
@@ -298,6 +311,9 @@ class _BottomBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(gameProvider.notifier);
     final canSubmit = gameState.canSubmit;
+    final isPremium = ref
+        .watch(premiumProvider)
+        .maybeWhen(data: (v) => v, orElse: () => false);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
@@ -309,18 +325,53 @@ class _BottomBar extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          // Hint button (Phase 2 placeholder)
+          // Hint button — rewarded ad for free users, free for Pro
           Expanded(
             flex: 1,
             child: OutlinedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('💡 Hints powered by rewarded ads — coming in Phase 2'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+              onPressed: () async {
+                if (isPremium) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Hints are free for Cluster Pro members! '
+                        '(full hint logic in Phase 3)',
+                      ),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+
+                final earned = await AdService.instance.showRewarded();
+                if (!context.mounted) return;
+
+                if (earned) {
+                  // Reveal the category label of the first unrevealed group
+                  final gs = ref.read(gameProvider);
+                  final revealedIds = gs.revealedGroups
+                      .map((g) => g.id)
+                      .toSet();
+                  final unrevealed = gs.puzzle?.groups
+                      .where((g) => !revealedIds.contains(g.id))
+                      .toList();
+                  if (unrevealed != null && unrevealed.isNotEmpty) {
+                    final category = unrevealed.first.category;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Hint: one group is $category'),
+                        duration: const Duration(seconds: 4),
+                      ),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('No ad available — try again in a moment'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
               },
               icon: const Icon(Icons.lightbulb_outline, size: 18),
               label: const Text('Hint'),

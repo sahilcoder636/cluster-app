@@ -1,13 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
+import 'premium_notifier.dart';
 
-class PremiumScreen extends StatelessWidget {
+class PremiumScreen extends ConsumerStatefulWidget {
   const PremiumScreen({super.key});
 
   @override
+  ConsumerState<PremiumScreen> createState() => _PremiumScreenState();
+}
+
+class _PremiumScreenState extends ConsumerState<PremiumScreen> {
+  bool _isPurchasing = false;
+
+  Future<void> _onUpgrade() async {
+    setState(() => _isPurchasing = true);
+    try {
+      await ref.read(premiumProvider.notifier).purchase();
+      if (!mounted) return;
+      final isPremium = ref
+          .read(premiumProvider)
+          .maybeWhen(data: (v) => v, orElse: () => false);
+      if (isPremium) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Welcome to Cluster Pro! 🎉')),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Purchase failed: $e')));
+    } finally {
+      if (mounted) setState(() => _isPurchasing = false);
+    }
+  }
+
+  Future<void> _onRestore() async {
+    try {
+      await ref.read(premiumProvider.notifier).restore();
+      if (!mounted) return;
+      final isPremium = ref
+          .read(premiumProvider)
+          .maybeWhen(data: (v) => v, orElse: () => false);
+      if (isPremium) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Purchase restored!')));
+        context.pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No previous purchase found')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Restore failed: $e')));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final premiumAsync = ref.watch(premiumProvider);
+    final isPremium = premiumAsync.maybeWhen(
+      data: (v) => v,
+      orElse: () => false,
+    );
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -46,29 +110,75 @@ class PremiumScreen extends StatelessWidget {
               const SizedBox(height: 16),
               const _FeatureRow(icon: Icons.bar_chart, text: 'Detailed stats'),
               const Spacer(),
-              const Text(
-                '\$2.99 / lifetime',
-                style: TextStyle(
-                  color: AppColors.onBackground,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Coming soon — RevenueCat wires in Phase 2',
+
+              // ── Already Pro banner ─────────────────────────────────────
+              if (isPremium) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: AppColors.streakGradient,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.verified_rounded,
+                        color: Colors.white,
+                        size: 22,
                       ),
+                      SizedBox(width: 10),
+                      Text(
+                        "You're already a Pro member ✓",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ] else ...[
+                // ── Price + purchase ─────────────────────────────────────
+                const Text(
+                  '\$2.99 / lifetime',
+                  style: TextStyle(
+                    color: AppColors.onBackground,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _isPurchasing ? null : _onUpgrade,
+                  child: _isPurchasing
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Upgrade now'),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: _isPurchasing ? null : _onRestore,
+                  child: const Text(
+                    'Restore previous purchase',
+                    style: TextStyle(
+                      color: AppColors.onSurface,
+                      fontSize: 13,
+                      decoration: TextDecoration.underline,
                     ),
-                  );
-                },
-                child: const Text('Upgrade now'),
-              ),
-              const SizedBox(height: 32),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
             ],
           ),
         ),
