@@ -1,6 +1,5 @@
 import 'package:go_router/go_router.dart';
 
-import '../data/models/puzzle.dart';
 import '../features/game/game_notifier.dart';
 import '../features/game/game_screen.dart';
 import '../features/home/home_screen.dart';
@@ -14,8 +13,12 @@ final router = GoRouter(
     GoRoute(
       path: '/game',
       builder: (context, state) {
-        final puzzle = state.extra as Puzzle;
-        return GameScreen(puzzle: puzzle);
+        final args = state.extra as GameArgs;
+        return GameScreen(
+          puzzle: args.puzzle,
+          gameSource: args.gameSource,
+          packName: args.packName,
+        );
       },
     ),
     GoRoute(

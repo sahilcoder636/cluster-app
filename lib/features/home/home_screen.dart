@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../core/ad_service.dart';
 import '../../core/theme.dart';
+import '../../data/repositories/pack_repository.dart';
 import '../../data/repositories/puzzle_repository.dart';
+import '../../data/services/notification_service.dart';
 import '../../data/services/streak_service.dart';
 import '../game/game_notifier.dart';
+import '../game/game_screen.dart';
 import '../premium/premium_notifier.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -17,6 +21,10 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final PackRepository _packRepo = PackRepository();
+
+  static const String _notificationAskedKey = 'notification_asked';
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +34,96 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (!isPremium) {
       AdService.instance.loadBanner(onLoaded: () { if (mounted) setState(() {}); });
     }
+
+    // Ask for notification permission once on first launch.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeRequestNotificationPermission();
+    });
+  }
+
+  Future<void> _maybeRequestNotificationPermission() async {
+    final box = Hive.box(StreakService.boxName);
+    final alreadyAsked = box.get(_notificationAskedKey, defaultValue: false) as bool;
+    if (alreadyAsked) return;
+
+    // Wait 2 seconds so the user has a moment to look at the home screen.
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+
+    final granted =
+        await NotificationService.instance.requestPermission(context);
+    if (granted) {
+      await NotificationService.instance.scheduleDailyReminder();
+    }
+
+    // Record that we've asked, regardless of the outcome.
+    await box.put(_notificationAskedKey, true);
+  }
+
+  // ── Pack tap handlers ─────────────────────────────────────────────────────
+
+  Future<void> _onPackTap(String packName, {required bool isPremiumPack}) async {
+    final isPremium =
+        ref.read(premiumProvider).maybeWhen(data: (v) => v, orElse: () => false);
+
+    if (isPremiumPack && !isPremium) {
+      context.go('/premium');
+      return;
+    }
+
+    final isCompleted = await ref.read(packCompletedProvider(packName).future);
+    if (!mounted) return;
+    
+    if (isCompleted) {
+      final playAgain = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: AppColors.surfaceElevated,
+          title: const Text('Pack Completed', style: TextStyle(color: AppColors.onBackground)),
+          content: const Text('You have completed all puzzles in this pack. Do you want to play it again?', style: TextStyle(color: AppColors.onSurface)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Play again'),
+            ),
+          ],
+        ),
+      );
+
+      if (playAgain != true) return;
+      await _packRepo.resetPack(packName);
+      ref.invalidate(packCompletedProvider(packName));
+    }
+
+    final playedIds = await _packRepo.getPlayedIds(packName);
+    final puzzle = await _packRepo.getNextUnplayedPuzzle(packName, playedIds);
+
+    if (!mounted) return;
+
+    if (puzzle == null) {
+      final displayName = packName[0].toUpperCase() + packName.substring(1);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              "You've completed all $displayName puzzles! More coming soon."),
+        ),
+      );
+      return;
+    }
+
+    ref.read(gameProvider.notifier).loadPuzzle(puzzle);
+    context.go(
+      '/game',
+      extra: GameArgs(
+        puzzle: puzzle,
+        gameSource: GameSource.pack,
+        packName: packName,
+      ),
+    );
   }
 
   @override
@@ -94,7 +192,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   todayAsync: todayAsync,
                   onPlay: (puzzle) {
                     ref.read(gameProvider.notifier).loadPuzzle(puzzle);
-                    context.go('/game', extra: puzzle);
+                    context.go(
+                      '/game',
+                      extra: GameArgs(
+                        puzzle: puzzle,
+                        gameSource: GameSource.daily,
+                      ),
+                    );
                   },
                 ),
               ),
@@ -127,34 +231,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 childAspectRatio: 1.4,
                 children: [
                   _PackCard(
+                    packName: 'movies',
                     emoji: '🎬',
                     title: 'Movies',
                     isLocked: false,
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Movies pack — coming soon!')),
-                    ),
+                    onTap: () => _onPackTap('movies', isPremiumPack: false),
                   ),
                   _PackCard(
+                    packName: 'sports',
                     emoji: '⚽',
                     title: 'Sports',
                     isLocked: false,
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Sports pack — coming soon!')),
-                    ),
+                    onTap: () => _onPackTap('sports', isPremiumPack: false),
                   ),
                   _PackCard(
+                    packName: 'music',
                     emoji: '🎵',
                     title: 'Music',
-                    isLocked: true,
-                    onTap: () => context.go('/premium'),
+                    isLocked: !isPremium,
+                    onTap: () => _onPackTap('music', isPremiumPack: true),
                   ),
                   _PackCard(
+                    packName: 'food',
                     emoji: '🍕',
                     title: 'Food',
-                    isLocked: true,
-                    onTap: () => context.go('/premium'),
+                    isLocked: !isPremium,
+                    onTap: () => _onPackTap('food', isPremiumPack: true),
                   ),
                 ],
               ),
@@ -347,79 +449,102 @@ class _DailyCard extends StatelessWidget {
   }
 }
 
-class _PackCard extends StatelessWidget {
+class _PackCard extends ConsumerWidget {
   const _PackCard({
+    required this.packName,
     required this.emoji,
     required this.title,
     required this.isLocked,
     required this.onTap,
   });
 
+  final String packName;
   final String emoji;
   final String title;
   final bool isLocked;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isCompleted = ref.watch(packCompletedProvider(packName)).maybeWhen(
+      data: (v) => v,
+      orElse: () => false,
+    );
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.surfaceElevated, width: 1),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.surfaceElevated, width: 1),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(emoji, style: const TextStyle(fontSize: 28)),
-                if (isLocked)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceElevated,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.lock_outline_rounded,
-                            size: 10, color: AppColors.onSurface),
-                        SizedBox(width: 3),
-                        Text(
-                          'PRO',
-                          style: TextStyle(
-                            color: AppColors.onSurface,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1,
-                          ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(emoji, style: const TextStyle(fontSize: 28)),
+                    if (isLocked)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceElevated,
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      ],
-                    ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.lock_outline_rounded,
+                                size: 10, color: AppColors.onSurface),
+                            SizedBox(width: 3),
+                            Text(
+                              'PRO',
+                              style: TextStyle(
+                                color: AppColors.onSurface,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.onBackground,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
                   ),
+                ),
               ],
             ),
-            Text(
-              title,
-              style: const TextStyle(
-                color: AppColors.onBackground,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+          ),
+          if (isCompleted)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(4),
+                child: const Icon(Icons.check, size: 12, color: Colors.white),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
 }
-
-

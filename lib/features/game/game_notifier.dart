@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/models/puzzle.dart';
+import '../../data/repositories/pack_repository.dart';
 
 part 'game_notifier.g.dart';
 
@@ -20,6 +22,19 @@ enum GamePhase {
 
   /// 4 mistakes used — game lost.
   failed,
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GameSource
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Indicates how the game was launched.
+enum GameSource {
+  /// Today's daily challenge.
+  daily,
+
+  /// A puzzle from a practice pack.
+  pack,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -109,6 +124,8 @@ class GameResultData {
     required this.won,
     required this.solveSequence,
     required this.mistakeCount,
+    required this.gameSource,
+    this.packName,
   });
 
   final Puzzle puzzle;
@@ -117,6 +134,12 @@ class GameResultData {
   /// Groups in the order they were solved (may be partial on failure).
   final List<PuzzleGroup> solveSequence;
   final int mistakeCount;
+
+  /// Whether this game came from the daily challenge or a practice pack.
+  final GameSource gameSource;
+
+  /// The pack name (e.g. `'movies'`). Non-null when [gameSource] is [GameSource.pack].
+  final String? packName;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -207,8 +230,7 @@ class GameNotifier extends _$GameNotifier {
     final s = state;
     state = s.copyWith(
       shouldShake: false,
-      selectedWords:
-          s.phase == GamePhase.failed ? s.selectedWords : const [],
+      selectedWords: s.phase == GamePhase.failed ? s.selectedWords : const [],
       isOneAway: false,
     );
   }
@@ -217,14 +239,37 @@ class GameNotifier extends _$GameNotifier {
   void reset() => state = const GameState();
 
   /// Snapshots game outcome for navigation to ResultScreen.
-  GameResultData buildResult() {
+  ///
+  /// If [gameSource] is [GameSource.pack] and the player won, automatically
+  /// marks the puzzle as played in [PackRepository] (fire-and-forget).
+  GameResultData buildResult({
+    required GameSource gameSource,
+    String? packName,
+  }) {
     final s = state;
-    return GameResultData(
+    final won = s.phase == GamePhase.solved;
+
+    final result = GameResultData(
       puzzle: s.puzzle!,
-      won: s.phase == GamePhase.solved,
+      won: won,
       solveSequence: s.solveSequence,
       mistakeCount: s.mistakeCount,
+      gameSource: gameSource,
+      packName: packName,
     );
+
+    // Auto-mark the pack puzzle as played when the player wins.
+    if (gameSource == GameSource.pack && won && packName != null) {
+      ref
+          .read(packRepositoryProvider)
+          .markPlayed(packName, s.puzzle!.id)
+          .then((_) => ref.invalidate(packCompletedProvider(packName)))
+          .catchError(
+            (Object e) => debugPrint('[PackRepo] markPlayed error: $e'),
+          );
+    }
+
+    return result;
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────
@@ -232,8 +277,9 @@ class GameNotifier extends _$GameNotifier {
   void _handleCorrect(GameState s, PuzzleGroup hit) {
     final selected = Set<String>.from(s.selectedWords);
     final newRevealed = [...s.revealedGroups, hit];
-    final newRemaining =
-        s.remainingWords.where((w) => !selected.contains(w)).toList();
+    final newRemaining = s.remainingWords
+        .where((w) => !selected.contains(w))
+        .toList();
     final newSeq = [...s.solveSequence, hit];
     final solved = newRevealed.length == 4;
 

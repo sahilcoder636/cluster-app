@@ -58,6 +58,10 @@ dependencies:
   # JSON serialization (runtime annotations)
   json_annotation: ^4.9.0
 
+  # Local push notifications
+  flutter_local_notifications: ^18.0.0
+  timezone: ^0.10.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -87,3 +91,7 @@ flutter:
 
   assets:
     - assets/puzzles.json
+    - assets/packs/movies.json
+    - assets/packs/sports.json
+    - assets/packs/music.json
+    - assets/packs/food.json

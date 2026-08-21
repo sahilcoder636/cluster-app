@@ -1,0 +1,152 @@
+[
+  {
+    "id": "movies-001",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "movies-001-g1",
+        "category": "Spielberg Films",
+        "words": ["JAWS", "E.T.", "SCHINDLER", "LINCOLN"],
+        "difficulty": 1
+      },
+      {
+        "id": "movies-001-g2",
+        "category": "Villain Actors",
+        "words": ["HANNIBAL", "JOKER", "THANOS", "VOLDEMORT"],
+        "difficulty": 2
+      },
+      {
+        "id": "movies-001-g3",
+        "category": "One-Word Sci-Fi Titles",
+        "words": ["ARRIVAL", "GRAVITY", "CONTACT", "INTERSTELLAR"],
+        "difficulty": 3
+      },
+      {
+        "id": "movies-001-g4",
+        "category": "___ Day (Movie Titles)",
+        "words": ["GROUND", "INDEPENDENCE", "JUDGMENT", "D"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "movies-002",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "movies-002-g1",
+        "category": "Pixar Films",
+        "words": ["UP", "SOUL", "COCO", "RATATOUILLE"],
+        "difficulty": 1
+      },
+      {
+        "id": "movies-002-g2",
+        "category": "Meryl Streep Films",
+        "words": ["MAMMA", "KRAMER", "DOUBT", "DEVIL"],
+        "difficulty": 2
+      },
+      {
+        "id": "movies-002-g3",
+        "category": "Film Noir Keywords",
+        "words": ["FEMME", "GUMSHOE", "RACKET", "HEIST"],
+        "difficulty": 3
+      },
+      {
+        "id": "movies-002-g4",
+        "category": "Movies Named After Colors",
+        "words": ["PURPLE", "SCARLET", "BLUE", "SILVER"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "movies-003",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "movies-003-g1",
+        "category": "Bond Girls (First Names)",
+        "words": ["HONEY", "VESPER", "NOMI", "MONEYPENNY"],
+        "difficulty": 1
+      },
+      {
+        "id": "movies-003-g2",
+        "category": "Words in 'The Godfather'",
+        "words": ["OFFER", "FAMILY", "DON", "CORLEONE"],
+        "difficulty": 2
+      },
+      {
+        "id": "movies-003-g3",
+        "category": "Horror Sub-Genres",
+        "words": ["SLASHER", "FOLK", "COSMIC", "SPLATTER"],
+        "difficulty": 3
+      },
+      {
+        "id": "movies-003-g4",
+        "category": "Best Picture Winners (2010s)",
+        "words": ["ARGO", "SPOTLIGHT", "MOONLIGHT", "SHAPE"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "movies-004",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "movies-004-g1",
+        "category": "Marvel Superheroes",
+        "words": ["IRONMAN", "THOR", "PANTHER", "WIDOW"],
+        "difficulty": 1
+      },
+      {
+        "id": "movies-004-g2",
+        "category": "Nolan Films (One Word)",
+        "words": ["DUNKIRK", "INCEPTION", "TENET", "OPPENHEIMER"],
+        "difficulty": 2
+      },
+      {
+        "id": "movies-004-g3",
+        "category": "Tarantino Trademarks",
+        "words": ["TRUNK", "DINER", "BRIEFCASE", "CHAPTER"],
+        "difficulty": 3
+      },
+      {
+        "id": "movies-004-g4",
+        "category": "Movies About Dancing",
+        "words": ["FLASHDANCE", "DIRTY", "STOMP", "FAME"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "movies-005",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "movies-005-g1",
+        "category": "Disney Princesses",
+        "words": ["ARIEL", "MOANA", "TIANA", "BELLE"],
+        "difficulty": 1
+      },
+      {
+        "id": "movies-005-g2",
+        "category": "Ridley Scott Films",
+        "words": ["GLADIATOR", "ALIEN", "BLADE", "EXODUS"],
+        "difficulty": 2
+      },
+      {
+        "id": "movies-005-g3",
+        "category": "Film School Movements",
+        "words": ["NOUVELLE", "DOGME", "NEOREALISM", "EXPRESSIONISM"],
+        "difficulty": 3
+      },
+      {
+        "id": "movies-005-g4",
+        "category": "Oscar Categories (Last Word)",
+        "words": ["PICTURE", "DIRECTOR", "SCREENPLAY", "SOUND"],
+        "difficulty": 4
+      }
+    ]
+  }
+]

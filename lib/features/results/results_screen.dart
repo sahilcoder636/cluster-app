@@ -80,7 +80,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               Text(
                 widget.resultData.won
                     ? 'You solved the puzzle.'
-                    : "You'll get it tomorrow.",
+                    : (widget.resultData.gameSource == GameSource.daily
+                        ? "You'll get it tomorrow."
+                        : "Keep practicing!"),
                 style: const TextStyle(
                   color: AppColors.onSurface,
                   fontSize: 16,
@@ -113,15 +115,28 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                 label: const Text('Share result'),
               ),
               const SizedBox(height: 24),
-              Text(
-                'Play again tomorrow\nNext puzzle in $hours:$mins',
-                style: const TextStyle(
-                  color: AppColors.onSurface,
-                  fontSize: 14,
-                  height: 1.5,
+              if (widget.resultData.gameSource == GameSource.daily)
+                Text(
+                  'Play again tomorrow\nNext puzzle in $hours:$mins',
+                  style: const TextStyle(
+                    color: AppColors.onSurface,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                )
+              else
+                ElevatedButton(
+                  onPressed: () {
+                    ref.read(gameProvider.notifier).reset();
+                    context.go('/home');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Play again'),
                 ),
-                textAlign: TextAlign.center,
-              ),
               const SizedBox(height: 32),
               TextButton(
                 onPressed: () => context.push('/premium'),

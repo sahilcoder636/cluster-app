@@ -1,0 +1,152 @@
+[
+  {
+    "id": "music-001",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "music-001-g1",
+        "category": "Madonna Albums",
+        "words": ["RAY", "EROTICA", "BEDTIME", "CONFESSIONS"],
+        "difficulty": 1
+      },
+      {
+        "id": "music-001-g2",
+        "category": "Music Production Terms",
+        "words": ["COMPRESSION", "REVERB", "SIDECHAIN", "MASTERING"],
+        "difficulty": 2
+      },
+      {
+        "id": "music-001-g3",
+        "category": "Time Signatures (Spoken)",
+        "words": ["COMMON", "WALTZ", "MARCH", "COMPOUND"],
+        "difficulty": 3
+      },
+      {
+        "id": "music-001-g4",
+        "category": "___ of Music (Songs/Titles)",
+        "words": ["SOUND", "SCHOOL", "LOVE", "POWER"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "music-002",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "music-002-g1",
+        "category": "String Instruments",
+        "words": ["VIOLIN", "CELLO", "HARP", "MANDOLIN"],
+        "difficulty": 1
+      },
+      {
+        "id": "music-002-g2",
+        "category": "Kanye West Albums (One Word)",
+        "words": ["GRADUATION", "YEEZUS", "DONDA", "VULTURES"],
+        "difficulty": 2
+      },
+      {
+        "id": "music-002-g3",
+        "category": "Music Key Signatures",
+        "words": ["DORIAN", "PHRYGIAN", "LYDIAN", "MIXOLYDIAN"],
+        "difficulty": 3
+      },
+      {
+        "id": "music-002-g4",
+        "category": "Words in Jazz Standards",
+        "words": ["AUTUMN", "SUMMERTIME", "MISTY", "SATIN"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "music-003",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "music-003-g1",
+        "category": "David Bowie Aliases",
+        "words": ["ZIGGY", "THIN", "ALADDIN", "JARETH"],
+        "difficulty": 1
+      },
+      {
+        "id": "music-003-g2",
+        "category": "Electronic Music Sub-Genres",
+        "words": ["TECHNO", "AMBIENT", "TRANCE", "DUBSTEP"],
+        "difficulty": 2
+      },
+      {
+        "id": "music-003-g3",
+        "category": "Beatles Song Words (First Word)",
+        "words": ["YESTERDAY", "BLACKBIRD", "IMAGINE", "REVOLUTION"],
+        "difficulty": 3
+      },
+      {
+        "id": "music-003-g4",
+        "category": "Orchestra Sections",
+        "words": ["STRINGS", "WOODWIND", "BRASS", "PERCUSSION"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "music-004",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "music-004-g1",
+        "category": "Music Notation Symbols",
+        "words": ["CLEF", "SHARP", "FLAT", "NATURAL"],
+        "difficulty": 1
+      },
+      {
+        "id": "music-004-g2",
+        "category": "Famous Music Labels",
+        "words": ["MOTOWN", "COLUMBIA", "ISLAND", "PARLOPHONE"],
+        "difficulty": 2
+      },
+      {
+        "id": "music-004-g3",
+        "category": "Guitar Chord Types",
+        "words": ["DIMINISHED", "AUGMENTED", "SUSPENDED", "DOMINANT"],
+        "difficulty": 3
+      },
+      {
+        "id": "music-004-g4",
+        "category": "Opera Voice Types",
+        "words": ["SOPRANO", "MEZZO", "BARITONE", "CONTRALTO"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "music-005",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "music-005-g1",
+        "category": "Taylor Swift Albums",
+        "words": ["FEARLESS", "FOLKLORE", "MIDNIGHTS", "EVERMORE"],
+        "difficulty": 1
+      },
+      {
+        "id": "music-005-g2",
+        "category": "Woodwind Instruments",
+        "words": ["OBOE", "BASSOON", "CLARINET", "PICCOLO"],
+        "difficulty": 2
+      },
+      {
+        "id": "music-005-g3",
+        "category": "Italian Music Tempo Markings",
+        "words": ["ALLEGRO", "ANDANTE", "PRESTO", "ADAGIO"],
+        "difficulty": 3
+      },
+      {
+        "id": "music-005-g4",
+        "category": "Grammy Categories (Last Word)",
+        "words": ["ALBUM", "RECORD", "SONG", "ARTIST"],
+        "difficulty": 4
+      }
+    ]
+  }
+]

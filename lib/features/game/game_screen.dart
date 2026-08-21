@@ -11,10 +11,29 @@ import 'game_notifier.dart';
 import 'group_reveal_row.dart';
 import 'word_tile.dart';
 
-class GameScreen extends ConsumerStatefulWidget {
-  const GameScreen({super.key, required this.puzzle});
+class GameArgs {
+  const GameArgs({
+    required this.puzzle,
+    required this.gameSource,
+    this.packName,
+  });
 
   final Puzzle puzzle;
+  final GameSource gameSource;
+  final String? packName;
+}
+
+class GameScreen extends ConsumerStatefulWidget {
+  const GameScreen({
+    super.key,
+    required this.puzzle,
+    required this.gameSource,
+    this.packName,
+  });
+
+  final Puzzle puzzle;
+  final GameSource gameSource;
+  final String? packName;
 
   @override
   ConsumerState<GameScreen> createState() => _GameScreenState();
@@ -62,10 +81,12 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         // Small delay so the last reveal animation is visible
         await Future<void>.delayed(const Duration(milliseconds: 600));
 
-        if (mounted) {
-          final result = ref.read(gameProvider.notifier).buildResult();
-          context.go('/results', extra: result);
-        }
+        if (!context.mounted) return;
+        final result = ref.read(gameProvider.notifier).buildResult(
+              gameSource: widget.gameSource,
+              packName: widget.packName,
+            );
+        context.go('/results', extra: result);
       }
     });
 
@@ -357,12 +378,39 @@ class _BottomBar extends ConsumerWidget {
                       .toList();
                   if (unrevealed != null && unrevealed.isNotEmpty) {
                     final category = unrevealed.first.category;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Hint: one group is $category'),
-                        duration: const Duration(seconds: 4),
-                      ),
-                    );
+                    if (context.mounted) {
+                      showDialog(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                          backgroundColor: AppColors.surfaceElevated,
+                          icon: const Icon(
+                            Icons.lightbulb,
+                            color: AppColors.diff3,
+                            size: 32,
+                          ),
+                          title: const Text(
+                            'Hint',
+                            style: TextStyle(color: AppColors.onBackground),
+                          ),
+                          content: Text(
+                            'One group is:\n"$category"',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: AppColors.onBackground,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              child: const Text('Got it'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(

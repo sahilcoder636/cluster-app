@@ -1,0 +1,152 @@
+[
+  {
+    "id": "sports-001",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "sports-001-g1",
+        "category": "Summer Olympic Sports",
+        "words": ["JUDO", "FENCING", "ARCHERY", "ROWING"],
+        "difficulty": 1
+      },
+      {
+        "id": "sports-001-g2",
+        "category": "Grand Slam Tournaments",
+        "words": ["WIMBLEDON", "ROLAND", "FLUSHING", "MELBOURNE"],
+        "difficulty": 2
+      },
+      {
+        "id": "sports-001-g3",
+        "category": "F1 Teams (Partial Names)",
+        "words": ["FERRARI", "MCLAREN", "REDBULL", "HAAS"],
+        "difficulty": 3
+      },
+      {
+        "id": "sports-001-g4",
+        "category": "Sports Named After Places",
+        "words": ["RUGBY", "MARATHON", "LACROSSE", "SUMO"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "sports-002",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "sports-002-g1",
+        "category": "Football Positions",
+        "words": ["STRIKER", "WINGER", "SWEEPER", "LIBERO"],
+        "difficulty": 1
+      },
+      {
+        "id": "sports-002-g2",
+        "category": "Basketball Terms",
+        "words": ["PICK", "ALLEY-OOP", "FLAGRANT", "TRIPLE"],
+        "difficulty": 2
+      },
+      {
+        "id": "sports-002-g3",
+        "category": "Cricket Dismissal Types",
+        "words": ["STUMPED", "RUNOUT", "CAUGHT", "OBSTRUCTING"],
+        "difficulty": 3
+      },
+      {
+        "id": "sports-002-g4",
+        "category": "Words in Sporting Scores",
+        "words": ["DEUCE", "LOVE", "NIL", "PAR"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "sports-003",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "sports-003-g1",
+        "category": "Winter Olympic Sports",
+        "words": ["BIATHLON", "SKELETON", "CURLING", "LUGE"],
+        "difficulty": 1
+      },
+      {
+        "id": "sports-003-g2",
+        "category": "NFL Teams (Cities)",
+        "words": ["BUFFALO", "DALLAS", "MIAMI", "SEATTLE"],
+        "difficulty": 2
+      },
+      {
+        "id": "sports-003-g3",
+        "category": "Golf Scoring Terms",
+        "words": ["EAGLE", "BIRDIE", "BOGEY", "ALBATROSS"],
+        "difficulty": 3
+      },
+      {
+        "id": "sports-003-g4",
+        "category": "Martial Arts Belts",
+        "words": ["WHITE", "YELLOW", "GREEN", "PURPLE"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "sports-004",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "sports-004-g1",
+        "category": "Types of Swimming Stroke",
+        "words": ["BUTTERFLY", "BACKSTROKE", "BREASTSTROKE", "FREESTYLE"],
+        "difficulty": 1
+      },
+      {
+        "id": "sports-004-g2",
+        "category": "Snooker Ball Colors",
+        "words": ["RED", "YELLOW", "BROWN", "BLUE"],
+        "difficulty": 2
+      },
+      {
+        "id": "sports-004-g3",
+        "category": "Track Events (Distance in Name)",
+        "words": ["CENTURY", "MARATHON", "MILE", "STEEPLECHASE"],
+        "difficulty": 3
+      },
+      {
+        "id": "sports-004-g4",
+        "category": "Famous Retired Jerseys",
+        "words": ["JORDAN", "GRETZKY", "PELE", "FEDERER"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "sports-005",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "sports-005-g1",
+        "category": "Things in a Boxing Ring",
+        "words": ["CORNER", "BELL", "ROPE", "GLOVE"],
+        "difficulty": 1
+      },
+      {
+        "id": "sports-005-g2",
+        "category": "Rugby Positions",
+        "words": ["HOOKER", "FLANKER", "FLY-HALF", "PROP"],
+        "difficulty": 2
+      },
+      {
+        "id": "sports-005-g3",
+        "category": "Equestrian Disciplines",
+        "words": ["DRESSAGE", "EVENTING", "SHOWJUMPING", "POLO"],
+        "difficulty": 3
+      },
+      {
+        "id": "sports-005-g4",
+        "category": "Words Also Used in Sports Scoring",
+        "words": ["FRAME", "INNING", "OVER", "QUARTER"],
+        "difficulty": 4
+      }
+    ]
+  }
+]

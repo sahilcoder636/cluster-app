@@ -1,0 +1,152 @@
+[
+  {
+    "id": "food-001",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "food-001-g1",
+        "category": "Japanese Street Foods",
+        "words": ["TAKOYAKI", "YAKITORI", "TAIYAKI", "ONIGIRI"],
+        "difficulty": 1
+      },
+      {
+        "id": "food-001-g2",
+        "category": "Types of Cheese",
+        "words": ["BRIE", "GOUDA", "MANCHEGO", "GRUYERE"],
+        "difficulty": 2
+      },
+      {
+        "id": "food-001-g3",
+        "category": "Fermented Foods",
+        "words": ["KIMCHI", "KEFIR", "TEMPEH", "MISO"],
+        "difficulty": 3
+      },
+      {
+        "id": "food-001-g4",
+        "category": "Knife Cuts (Culinary)",
+        "words": ["BRUNOISE", "JULIENNE", "CHIFFONADE", "TOURNER"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "food-002",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "food-002-g1",
+        "category": "Hot Spices",
+        "words": ["CAYENNE", "HABANERO", "WASABI", "HORSERADISH"],
+        "difficulty": 1
+      },
+      {
+        "id": "food-002-g2",
+        "category": "French Pastries",
+        "words": ["CROISSANT", "MADELEINE", "PROFITEROLE", "FINANCIER"],
+        "difficulty": 2
+      },
+      {
+        "id": "food-002-g3",
+        "category": "Mother Sauces (French)",
+        "words": ["BECHAMEL", "VELOUTE", "ESPAGNOLE", "HOLLANDAISE"],
+        "difficulty": 3
+      },
+      {
+        "id": "food-002-g4",
+        "category": "___ butter (Compound Butters)",
+        "words": ["GARLIC", "HERB", "TRUFFLE", "ANCHOVY"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "food-003",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "food-003-g1",
+        "category": "Pasta Shapes",
+        "words": ["RIGATONI", "ORECCHIETTE", "FARFALLE", "CAVATAPPI"],
+        "difficulty": 1
+      },
+      {
+        "id": "food-003-g2",
+        "category": "South American Dishes",
+        "words": ["CEVICHE", "ASADO", "AREPAS", "FEIJOADA"],
+        "difficulty": 2
+      },
+      {
+        "id": "food-003-g3",
+        "category": "Styles of Coffee",
+        "words": ["CORTADO", "RISTRETTO", "MACCHIATO", "AFFOGATO"],
+        "difficulty": 3
+      },
+      {
+        "id": "food-003-g4",
+        "category": "Words in Cocktail Names",
+        "words": ["SOUR", "FIZZ", "SPRITZ", "COLLINS"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "food-004",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "food-004-g1",
+        "category": "Citrus Fruits",
+        "words": ["POMELO", "CLEMENTINE", "YUZU", "KUMQUAT"],
+        "difficulty": 1
+      },
+      {
+        "id": "food-004-g2",
+        "category": "Indian Breads",
+        "words": ["NAAN", "PARATHA", "CHAPATI", "DOSA"],
+        "difficulty": 2
+      },
+      {
+        "id": "food-004-g3",
+        "category": "Umami-Rich Ingredients",
+        "words": ["ANCHOVY", "PARMESAN", "MARMITE", "DASHI"],
+        "difficulty": 3
+      },
+      {
+        "id": "food-004-g4",
+        "category": "Regional US BBQ Styles",
+        "words": ["TEXAS", "MEMPHIS", "CAROLINA", "KANSAS"],
+        "difficulty": 4
+      }
+    ]
+  },
+  {
+    "id": "food-005",
+    "date": "pack",
+    "groups": [
+      {
+        "id": "food-005-g1",
+        "category": "Edible Fungi",
+        "words": ["SHIITAKE", "CHANTERELLE", "PORCINI", "ENOKI"],
+        "difficulty": 1
+      },
+      {
+        "id": "food-005-g2",
+        "category": "Michelin Star Restaurant Terms",
+        "words": ["AMUSE-BOUCHE", "DEGUSTATION", "MISE", "TERROIR"],
+        "difficulty": 2
+      },
+      {
+        "id": "food-005-g3",
+        "category": "Mexican Chili Varieties",
+        "words": ["ANCHO", "MULATO", "GUAJILLO", "PASILLA"],
+        "difficulty": 3
+      },
+      {
+        "id": "food-005-g4",
+        "category": "Things That Rise (Baking)",
+        "words": ["SOURDOUGH", "BRIOCHE", "FOCACCIA", "CHALLAH"],
+        "difficulty": 4
+      }
+    ]
+  }
+]

@@ -6,6 +6,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'core/router.dart';
 import 'core/theme.dart';
+import 'data/services/notification_service.dart';
 import 'data/services/streak_service.dart';
 
 void main() async {
@@ -13,6 +14,8 @@ void main() async {
 
   await Hive.initFlutter();
   await Hive.openBox(StreakService.boxName);
+  await Hive.openBox<dynamic>('pack_played_box');
+  await NotificationService.instance.initialize();
 
   await MobileAds.instance.initialize();
   await Purchases.configure(
