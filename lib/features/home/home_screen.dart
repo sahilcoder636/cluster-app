@@ -129,58 +129,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final todayAsync = ref.watch(todaysPuzzleProvider);
-    final streak = StreakService.instance.getStreak();
     final todayLabel = _formatDate(DateTime.now());
     final isPremium = ref.watch(premiumProvider).maybeWhen(data: (v) => v, orElse: () => false);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // ── Title section ──────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [AppColors.accent, AppColors.accentLight],
-                      ).createShader(bounds),
-                      child: const Text(
-                        'CLUSTER',
-                        style: TextStyle(
-                          fontSize: 44,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 6,
-                          color: Colors.white,
+        child: ValueListenableBuilder(
+          valueListenable: Hive.box(StreakService.boxName).listenable(),
+          builder: (context, box, _) {
+            final streak = StreakService.instance.getStreak();
+            final hasShield = StreakService.instance.hasShield();
+            return CustomScrollView(
+              slivers: [
+                // ── Title section ──────────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [AppColors.accent, AppColors.accentLight],
+                          ).createShader(bounds),
+                          child: const Text(
+                            'CLUSTER',
+                            style: TextStyle(
+                              fontSize: 44,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 6,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'One puzzle. Every day.',
+                          style: TextStyle(
+                            color: AppColors.onSurface,
+                            fontSize: 14,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'One puzzle. Every day.',
-                      style: TextStyle(
-                        color: AppColors.onSurface,
-                        fontSize: 14,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            // ── Streak card ────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _StreakCard(streak: streak),
-              ),
-            ),
+                // ── Streak card ────────────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _StreakCard(
+                      streak: streak,
+                      hasShield: hasShield,
+                      isPremium: isPremium,
+                    ),
+                  ),
+                ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
             // ── Daily challenge card ───────────────────────────────────────
@@ -275,7 +283,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -302,9 +312,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _StreakCard extends StatelessWidget {
-  const _StreakCard({required this.streak});
+  const _StreakCard({
+    required this.streak,
+    required this.hasShield,
+    required this.isPremium,
+  });
 
   final int streak;
+  final bool hasShield;
+  final bool isPremium;
 
   @override
   Widget build(BuildContext context) {
@@ -339,6 +355,79 @@ class _StreakCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
+                const SizedBox(height: 6),
+                if (hasShield)
+                  const Row(
+                    children: [
+                      Icon(Icons.shield_rounded, color: Colors.blue, size: 14),
+                      SizedBox(width: 4),
+                      Text(
+                        'Streak protected',
+                        style: TextStyle(color: Colors.blue, fontSize: 11),
+                      ),
+                    ],
+                  )
+                else if (isPremium)
+                  GestureDetector(
+                    onTap: () => StreakService.instance.activateShield(),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.shield_outlined,
+                            color: AppColors.accent, size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          'Activate shield',
+                          style: TextStyle(
+                              color: AppColors.accent, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: AppColors.surface,
+                          title: const Text('Protect your streak',
+                              style: TextStyle(color: AppColors.onBackground)),
+                          content: const Text(
+                              'Watch a short ad to protect your streak for one missed day.',
+                              style: TextStyle(color: AppColors.onSurface)),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: const Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                Navigator.of(ctx).pop();
+                                final rewarded = await AdService.instance
+                                    .showRewarded();
+                                if (rewarded) {
+                                  await StreakService.instance.activateShield();
+                                }
+                              },
+                              child: const Text('Watch ad'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: const Row(
+                      children: [
+                        Icon(Icons.shield_outlined,
+                            color: AppColors.onSurface, size: 14),
+                        SizedBox(width: 4),
+                        Text(
+                          'Protect your streak →',
+                          style: TextStyle(
+                              color: AppColors.onSurface, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

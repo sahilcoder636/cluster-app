@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -263,14 +264,20 @@ class _WordGrid extends ConsumerWidget {
         final isSelected = gameState.selectedWords.contains(word);
         final shake = gameState.shouldShake && isSelected;
 
-        return WordTile(
-          key: ValueKey(word),
-          word: word,
-          isSelected: isSelected,
-          shake: shake,
-          onTap: () {
-            notifier.toggleTile(word);
-          },
+        return AnimatedScale(
+          scale: isSelected ? 1.04 : 1.0,
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOut,
+          child: WordTile(
+            key: ValueKey(word),
+            word: word,
+            isSelected: isSelected,
+            shake: shake,
+            onTap: () {
+              HapticFeedback.selectionClick();
+              notifier.toggleTile(word);
+            },
+          ),
         );
       },
     );
@@ -279,10 +286,31 @@ class _WordGrid extends ConsumerWidget {
 
 // ── Progress bar ─────────────────────────────────────────────────────────────
 
-class _ProgressBar extends StatelessWidget {
+class _ProgressBar extends StatefulWidget {
   const _ProgressBar({required this.groupsFound});
 
   final int groupsFound;
+
+  @override
+  State<_ProgressBar> createState() => _ProgressBarState();
+}
+
+class _ProgressBarState extends State<_ProgressBar> {
+  double _scale = 1.0;
+
+  @override
+  void didUpdateWidget(covariant _ProgressBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.groupsFound == 4 && oldWidget.groupsFound != 4) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        setState(() => _scale = 1.02);
+        Future.delayed(const Duration(milliseconds: 150), () {
+          if (mounted) setState(() => _scale = 1.0);
+        });
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -293,7 +321,7 @@ class _ProgressBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '$groupsFound / 4 groups',
+              '${widget.groupsFound} / 4 groups',
               style: const TextStyle(
                 color: AppColors.onSurface,
                 fontSize: 12,
@@ -301,19 +329,40 @@ class _ProgressBar extends StatelessWidget {
               ),
             ),
             Text(
-              '${(groupsFound / 4 * 100).round()}%',
+              '${(widget.groupsFound / 4 * 100).round()}%',
               style: const TextStyle(color: AppColors.onSurface, fontSize: 12),
             ),
           ],
         ),
         const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: groupsFound / 4,
-            backgroundColor: AppColors.surfaceElevated,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
-            minHeight: 6,
+        AnimatedScale(
+          scale: _scale,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: widget.groupsFound / 4),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, _) {
+              // Interpolate color from accent (0-50%) to a lighter tint (75-100%)
+              final colorProgress = ((value - 0.5) * 2).clamp(0.0, 1.0);
+              final barColor = Color.lerp(
+                    AppColors.accent,
+                    AppColors.accentLight,
+                    colorProgress,
+                  ) ??
+                  AppColors.accent;
+
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: value,
+                  backgroundColor: AppColors.surfaceElevated,
+                  valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                  minHeight: 6,
+                ),
+              );
+            },
           ),
         ),
       ],

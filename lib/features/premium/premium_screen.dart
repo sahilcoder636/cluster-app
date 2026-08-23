@@ -74,44 +74,70 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/home'),
-        ),
-        title: const Text('CLUSTER PRO'),
-      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 32),
+              // ── Close button ────────────────────────────────────────────
+              Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: AppColors.onSurface),
+                  onPressed: () =>
+                      context.canPop() ? context.pop() : context.go('/home'),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // ── Headline ────────────────────────────────────────────────
               const Text(
-                'Unlock everything.',
+                'Unlock the Full Experience',
                 style: TextStyle(
                   color: AppColors.onBackground,
-                  fontSize: 32,
+                  fontSize: 30,
                   fontWeight: FontWeight.w900,
+                  height: 1.2,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 48),
-              const _FeatureRow(icon: Icons.block, text: 'No more ads'),
-              const SizedBox(height: 16),
-              const _FeatureRow(icon: Icons.lightbulb, text: 'Unlimited hints'),
-              const SizedBox(height: 16),
-              const _FeatureRow(
-                icon: Icons.grid_view,
-                text: 'All practice packs',
+              const SizedBox(height: 8),
+
+              // ── Subheadline ─────────────────────────────────────────────
+              const Text(
+                'One-time purchase — no subscription, ever.',
+                style: TextStyle(
+                  color: AppColors.onSurface,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
-              const _FeatureRow(icon: Icons.bar_chart, text: 'Detailed stats'),
+
               const Spacer(),
 
-              // ── Already Pro banner ─────────────────────────────────────
+              // ── Benefit rows ────────────────────────────────────────────
+              const _BenefitRow(
+                icon: Icons.block_rounded,
+                title: 'Remove All Ads',
+                subtitle: 'Play without interruptions',
+              ),
+              const SizedBox(height: 20),
+              const _BenefitRow(
+                icon: Icons.music_note_rounded,
+                title: 'Unlock Music Pack',
+                subtitle: '25 puzzles themed around music',
+              ),
+              const SizedBox(height: 20),
+              const _BenefitRow(
+                icon: Icons.local_pizza_rounded,
+                title: 'Unlock Food Pack',
+                subtitle: '25 puzzles themed around food',
+              ),
+
+              const Spacer(),
+
+              // ── Already Pro banner ──────────────────────────────────────
               if (isPremium) ...[
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -141,17 +167,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                 ),
                 const SizedBox(height: 24),
               ] else ...[
-                // ── Price + purchase ─────────────────────────────────────
-                const Text(
-                  '\$2.99 / lifetime',
-                  style: TextStyle(
-                    color: AppColors.onBackground,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
+                // ── Primary CTA ─────────────────────────────────────────
                 ElevatedButton(
                   onPressed: _isPurchasing ? null : _onUpgrade,
                   child: _isPurchasing
@@ -163,21 +179,38 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Upgrade now'),
+                      : const Text('Unlock for \$2.99'),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
+
+                // ── Billed-once note ────────────────────────────────────
+                const Text(
+                  'Billed once. Restore purchases below.',
+                  style: TextStyle(
+                    color: AppColors.onSurface,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+
+                // ── Restore purchases ───────────────────────────────────
                 TextButton(
                   onPressed: _isPurchasing ? null : _onRestore,
-                  child: const Text(
-                    'Restore previous purchase',
-                    style: TextStyle(
-                      color: AppColors.onSurface,
-                      fontSize: 13,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
+                  child: const Text('Restore Purchases'),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 12),
+
+                // ── Legal text ──────────────────────────────────────────
+                const Text(
+                  'Payment charged to Google Play account on purchase confirmation.',
+                  style: TextStyle(
+                    color: AppColors.onSurface,
+                    fontSize: 10,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
               ],
             ],
           ),
@@ -187,24 +220,57 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
   }
 }
 
-class _FeatureRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
+// ─────────────────────────────────────────────────────────────────────────────
+// Benefit row widget
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const _FeatureRow({required this.icon, required this.text});
+class _BenefitRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _BenefitRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, color: AppColors.accent, size: 28),
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: AppColors.accent, size: 26),
+        ),
         const SizedBox(width: 16),
-        Text(
-          text,
-          style: const TextStyle(
-            color: AppColors.onSurface,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.onBackground,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: AppColors.onSurface,
+                  fontSize: 13,
+                ),
+              ),
+            ],
           ),
         ),
       ],

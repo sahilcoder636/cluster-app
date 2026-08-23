@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/ad_service.dart';
 import '../../core/theme.dart';
+import '../../data/services/streak_service.dart';
 import '../game/game_notifier.dart';
 import '../game/group_reveal_row.dart';
 import '../premium/premium_notifier.dart';
@@ -19,15 +21,129 @@ class ResultsScreen extends ConsumerStatefulWidget {
 }
 
 class _ResultsScreenState extends ConsumerState<ResultsScreen> {
+  static const _teaserKey = 'premium_teaser_shown';
+
   @override
   void initState() {
     super.initState();
-    final isPremium = ref.read(premiumProvider).maybeWhen(data: (v) => v, orElse: () => false);
+    final isPremium = ref
+        .read(premiumProvider)
+        .maybeWhen(data: (v) => v, orElse: () => false);
     if (!isPremium) {
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) AdService.instance.showInterstitial();
       });
     }
+    _maybeShowPremiumTeaser();
+  }
+
+  void _maybeShowPremiumTeaser() {
+    // Only trigger for daily games
+    if (widget.resultData.gameSource != GameSource.daily) return;
+
+    final isPremium = ref
+        .read(premiumProvider)
+        .maybeWhen(data: (v) => v, orElse: () => false);
+    if (isPremium) return;
+
+    final box = Hive.box(StreakService.boxName);
+    final alreadyShown = (box.get(_teaserKey) as bool?) ?? false;
+    if (alreadyShown) return;
+
+    Future.delayed(const Duration(milliseconds: 3500), () {
+      if (!mounted) return;
+      // Mark shown before displaying so it never shows twice
+      box.put(_teaserKey, true);
+      showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: AppColors.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (ctx) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: AppColors.onSurface.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const Text(
+                  'Enjoying Cluster?',
+                  style: TextStyle(
+                    color: AppColors.onBackground,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Remove ads and unlock 50+ more puzzles with one tap.',
+                  style: TextStyle(
+                    color: AppColors.onSurface,
+                    fontSize: 15,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      context.push('/premium');
+                    },
+                    child: const Text('See Premium →'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Maybe later'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  Widget _performanceBadge() {
+    final (label, color) = switch (widget.resultData.mistakeCount) {
+      0 => ('✨ Flawless', Colors.amber),
+      1 => ('🎯 Sharp', AppColors.accent),
+      2 => ('👍 Solid', Colors.green),
+      _ => ('💪 Got there', AppColors.onSurface),
+    };
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.40), width: 1),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
   }
 
   void _shareResult() {
@@ -81,15 +197,18 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                 widget.resultData.won
                     ? 'You solved the puzzle.'
                     : (widget.resultData.gameSource == GameSource.daily
-                        ? "You'll get it tomorrow."
-                        : "Keep practicing!"),
+                          ? "You'll get it tomorrow."
+                          : "Keep practicing!"),
                 style: const TextStyle(
                   color: AppColors.onSurface,
                   fontSize: 16,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
+              // ── Performance badge (wins only) ──────────────────────────
+              if (widget.resultData.won) _performanceBadge(),
+              const SizedBox(height: 16),
               // Reveal all 4 category rows
               ...widget.resultData.puzzle.groups.map(
                 (g) => Padding(
@@ -156,4 +275,3 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     );
   }
 }
-

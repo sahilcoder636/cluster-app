@@ -111,7 +111,7 @@ class _WordTileState extends State<WordTile>
                     color: AppColors.onTile,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
-                    letterSpacing: 0.4,
+                    letterSpacing: -0.5,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 2,

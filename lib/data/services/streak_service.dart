@@ -11,6 +11,7 @@ class StreakService {
   static const String _keyStreak = 'streakCount';
   static const String _keyLastPlayed = 'lastPlayedDate';
   static const String _keyPlayedIds = 'playedPuzzleIds';
+  static const String _keyShield = 'streak_shield_active';
 
   // Lazy singleton
   static final StreakService instance = StreakService._();
@@ -30,6 +31,9 @@ class StreakService {
     return _getPlayedIds().contains(puzzleId);
   }
 
+  /// Whether a streak shield is currently active.
+  bool hasShield() => (_box.get(_keyShield) as bool?) ?? false;
+
   // ── Writes ───────────────────────────────────────────────────────────────
 
   /// Records that [puzzleId] was completed.
@@ -42,6 +46,14 @@ class StreakService {
       await _box.put(_keyPlayedIds, ids);
     }
     if (won) await _incrementStreak();
+  }
+
+  /// Activates a streak shield to protect against one missed day.
+  Future<void> activateShield() async {
+    if (hasShield()) {
+      return; // ← prevent stacking
+    }
+    await _box.put(_keyShield, true);
   }
 
   // ── Private helpers ──────────────────────────────────────────────────────
@@ -59,10 +71,27 @@ class StreakService {
     // Idempotent — already counted today
     if (lastPlayed == today) return;
 
-    final yesterday = _dateStr(DateTime.now().subtract(const Duration(days: 1)));
+    final yesterday = _dateStr(
+      DateTime.now().subtract(const Duration(days: 1)),
+    );
     final current = getStreak();
 
-    final newStreak = (lastPlayed == yesterday) ? current + 1 : 1;
+    int newStreak;
+    if (lastPlayed == yesterday) {
+      // Normal continuous streak
+      newStreak = current + 1;
+    } else {
+      // Missed at least one day
+      if (hasShield() && current > 0) {
+        // Shield saves the existing streak, plus today's win
+        newStreak = current + 1;
+        await _box.put(_keyShield, false); // consume shield
+      } else {
+        // Streak broken, start fresh
+        newStreak = 1;
+      }
+    }
+
     await _box.put(_keyStreak, newStreak);
     await _box.put(_keyLastPlayed, today);
   }

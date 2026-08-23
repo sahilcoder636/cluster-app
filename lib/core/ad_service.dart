@@ -38,7 +38,10 @@ class AdService {
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
-        onAdLoaded: (_) { _bannerLoaded = true; onLoaded?.call(); },
+        onAdLoaded: (_) {
+          _bannerLoaded = true;
+          onLoaded?.call();
+        },
         onAdFailedToLoad: (ad, error) {
           dev.log('Banner failed to load: $error', name: 'AdService');
           _bannerLoaded = false;
