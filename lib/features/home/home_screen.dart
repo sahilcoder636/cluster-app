@@ -149,20 +149,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [AppColors.accent, AppColors.accentLight],
-                          ).createShader(bounds),
-                          child: const Text(
-                            'CLUSTER',
-                            style: TextStyle(
-                              fontSize: 44,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 6,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+                        const _ShimmerTitle(),
                         const SizedBox(height: 4),
                         const Text(
                           'One puzzle. Every day.',
@@ -328,7 +315,7 @@ class _StreakCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: AppColors.streakGradient,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
@@ -456,7 +443,7 @@ class _DailyCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: AppColors.dailyGradient,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.surfaceElevated, width: 1),
       ),
       child: Column(
@@ -568,7 +555,7 @@ class _PackCard extends ConsumerWidget {
           Container(
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(color: AppColors.surfaceElevated, width: 1),
             ),
             padding: const EdgeInsets.all(16),
@@ -586,7 +573,7 @@ class _PackCard extends ConsumerWidget {
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: AppColors.surfaceElevated,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
@@ -634,6 +621,63 @@ class _PackCard extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _ShimmerTitle extends StatefulWidget {
+  const _ShimmerTitle();
+
+  @override
+  State<_ShimmerTitle> createState() => _ShimmerTitleState();
+}
+
+class _ShimmerTitleState extends State<_ShimmerTitle> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final slide = -3.0 + _controller.value * 4.0;
+        return ShaderMask(
+          shaderCallback: (bounds) => LinearGradient(
+            begin: Alignment(slide, 0),
+            end: Alignment(slide + 2.0, 0),
+            colors: const [
+              AppColors.accent,
+              AppColors.accentLight,
+              AppColors.accent,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ).createShader(bounds),
+          child: const Text(
+            'CLUSTER',
+            style: TextStyle(
+              fontSize: 44,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 6,
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
     );
   }
 }

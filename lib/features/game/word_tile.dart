@@ -85,7 +85,7 @@ class _WordTileState extends State<WordTile>
               color: widget.isSelected
                   ? AppColors.tileSelected
                   : AppColors.surfaceTile,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: widget.isSelected
                     ? AppColors.tileSelectedBorder

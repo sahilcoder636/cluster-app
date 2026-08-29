@@ -58,7 +58,7 @@ class _GroupRevealRowState extends State<GroupRevealRow>
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           decoration: BoxDecoration(
             color: bgColor,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: color.withValues(alpha: 0.6), width: 1.5),
           ),
           child: Column(

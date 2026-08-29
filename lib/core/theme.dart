@@ -134,7 +134,7 @@ ThemeData buildAppTheme() {
         backgroundColor: AppColors.accent,
         foregroundColor: Colors.white,
         minimumSize: const Size(double.infinity, 52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w700,
@@ -172,14 +172,8 @@ ThemeData buildAppTheme() {
         fontSize: 16,
         fontWeight: FontWeight.w600,
       ),
-      bodyLarge: TextStyle(
-        color: AppColors.onSurface,
-        fontSize: 15,
-      ),
-      bodyMedium: TextStyle(
-        color: AppColors.onSurface,
-        fontSize: 13,
-      ),
+      bodyLarge: TextStyle(color: AppColors.onSurface, fontSize: 15),
+      bodyMedium: TextStyle(color: AppColors.onSurface, fontSize: 13),
       labelLarge: TextStyle(
         color: AppColors.onBackground,
         fontSize: 14,

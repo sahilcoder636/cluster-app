@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -20,21 +21,71 @@ class ResultsScreen extends ConsumerStatefulWidget {
   ConsumerState<ResultsScreen> createState() => _ResultsScreenState();
 }
 
-class _ResultsScreenState extends ConsumerState<ResultsScreen> {
+class _ResultsScreenState extends ConsumerState<ResultsScreen>
+    with TickerProviderStateMixin {
   static const _teaserKey = 'premium_teaser_shown';
+
+  late AnimationController _entryController;
+  late Animation<double> _entryFade;
+  late Animation<Offset> _entrySlide;
+
+  late AnimationController _badgeController;
+  double _badgeScale = 0.7;
 
   @override
   void initState() {
     super.initState();
+
+    _entryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _entryFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _entryController, curve: Curves.easeOutCubic),
+    );
+    _entrySlide = Tween<Offset>(begin: const Offset(0, 0.03), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _entryController, curve: Curves.easeOutCubic),
+        );
+
+    _badgeController = AnimationController(vsync: this);
+    _badgeController.addListener(() {
+      setState(() {
+        _badgeScale = _badgeController.value;
+      });
+    });
+
     final isPremium = ref
         .read(premiumProvider)
         .maybeWhen(data: (v) => v, orElse: () => false);
-    if (!isPremium) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) AdService.instance.showInterstitial();
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      if (!isPremium) {
+        AdService.instance.showInterstitial();
+      }
+      _entryController.forward();
+
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (!mounted) return;
+        final spring = const SpringDescription(
+          mass: 1,
+          stiffness: 350,
+          damping: 18,
+        );
+        final simulation = SpringSimulation(spring, 0.7, 1.0, 0);
+        _badgeController.animateWith(simulation);
       });
-    }
+    });
+
     _maybeShowPremiumTeaser();
+  }
+
+  @override
+  void dispose() {
+    _entryController.dispose();
+    _badgeController.dispose();
+    super.dispose();
   }
 
   void _maybeShowPremiumTeaser() {
@@ -58,7 +109,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         context: context,
         backgroundColor: AppColors.surface,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         builder: (ctx) {
           return Padding(
@@ -127,19 +178,22 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
       _ => ('💪 Got there', AppColors.onSurface),
     };
     return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.40), width: 1),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+      child: Transform.scale(
+        scale: _badgeScale,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: color.withValues(alpha: 0.40), width: 1),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),
@@ -179,96 +233,102 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 24),
-              Text(
-                widget.resultData.won ? 'Great job!' : 'Next time!',
-                style: const TextStyle(
-                  color: AppColors.onBackground,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.resultData.won
-                    ? 'You solved the puzzle.'
-                    : (widget.resultData.gameSource == GameSource.daily
-                          ? "You'll get it tomorrow."
-                          : "Keep practicing!"),
-                style: const TextStyle(
-                  color: AppColors.onSurface,
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              // ── Performance badge (wins only) ──────────────────────────
-              if (widget.resultData.won) _performanceBadge(),
-              const SizedBox(height: 16),
-              // Reveal all 4 category rows
-              ...widget.resultData.puzzle.groups.map(
-                (g) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: GroupRevealRow(key: ValueKey(g.id), group: g),
-                ),
-              ),
-              const SizedBox(height: 32),
-              // Emoji share grid display
-              Column(
-                children: widget.resultData.solveSequence.map((group) {
-                  final emoji = AppColors.difficultyEmoji(group.difficulty);
-                  return Text(
-                    '$emoji$emoji$emoji$emoji',
-                    style: const TextStyle(fontSize: 24, letterSpacing: 4),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: _shareResult,
-                icon: const Icon(Icons.share),
-                label: const Text('Share result'),
-              ),
-              const SizedBox(height: 24),
-              if (widget.resultData.gameSource == GameSource.daily)
-                Text(
-                  'Play again tomorrow\nNext puzzle in $hours:$mins',
-                  style: const TextStyle(
-                    color: AppColors.onSurface,
-                    fontSize: 14,
-                    height: 1.5,
+          child: FadeTransition(
+            opacity: _entryFade,
+            child: SlideTransition(
+              position: _entrySlide,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 24),
+                  Text(
+                    widget.resultData.won ? 'Great job!' : 'Next time!',
+                    style: const TextStyle(
+                      color: AppColors.onBackground,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                )
-              else
-                ElevatedButton(
-                  onPressed: () {
-                    ref.read(gameProvider.notifier).reset();
-                    context.go('/home');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.white,
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.resultData.won
+                        ? 'You solved the puzzle.'
+                        : (widget.resultData.gameSource == GameSource.daily
+                              ? "You'll get it tomorrow."
+                              : "Keep practicing!"),
+                    style: const TextStyle(
+                      color: AppColors.onSurface,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  child: const Text('Play again'),
-                ),
-              const SizedBox(height: 32),
-              TextButton(
-                onPressed: () => context.push('/premium'),
-                child: const Text(
-                  'Remove ads',
-                  style: TextStyle(
-                    fontSize: 12,
-                    decoration: TextDecoration.underline,
+                  const SizedBox(height: 16),
+                  // ── Performance badge (wins only) ──────────────────────────
+                  if (widget.resultData.won) _performanceBadge(),
+                  const SizedBox(height: 16),
+                  // Reveal all 4 category rows
+                  ...widget.resultData.puzzle.groups.map(
+                    (g) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: GroupRevealRow(key: ValueKey(g.id), group: g),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 32),
+                  // Emoji share grid display
+                  Column(
+                    children: widget.resultData.solveSequence.map((group) {
+                      final emoji = AppColors.difficultyEmoji(group.difficulty);
+                      return Text(
+                        '$emoji$emoji$emoji$emoji',
+                        style: const TextStyle(fontSize: 24, letterSpacing: 4),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    onPressed: _shareResult,
+                    icon: const Icon(Icons.share),
+                    label: const Text('Share result'),
+                  ),
+                  const SizedBox(height: 24),
+                  if (widget.resultData.gameSource == GameSource.daily)
+                    Text(
+                      'Play again tomorrow\nNext puzzle in $hours:$mins',
+                      style: const TextStyle(
+                        color: AppColors.onSurface,
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  else
+                    ElevatedButton(
+                      onPressed: () {
+                        ref.read(gameProvider.notifier).reset();
+                        context.go('/home');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Play again'),
+                    ),
+                  const SizedBox(height: 32),
+                  TextButton(
+                    onPressed: () => context.push('/premium'),
+                    child: const Text(
+                      'Remove ads',
+                      style: TextStyle(
+                        fontSize: 12,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-              const SizedBox(height: 24),
-            ],
+            ),
           ),
         ),
       ),

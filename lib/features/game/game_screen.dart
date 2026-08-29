@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -93,16 +96,63 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              color: AppColors.background.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.onSurface, size: 20),
+          onPressed: () => context.go('/home'),
+        ),
+        title: Text(
+          'CLUSTER',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: AppColors.onBackground,
+            letterSpacing: 3,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        actions: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(4, (i) {
+              final used = i < gameState.mistakeCount;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: used ? AppColors.mistakeUsed : AppColors.mistakeEmpty,
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
-            _TopBar(
-              puzzleDate: widget.puzzle.date,
-              mistakeCount: gameState.mistakeCount,
-            ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: MediaQuery.paddingOf(context).top + kToolbarHeight + 8,
+                ),
                 child: Column(
                   children: [
                     const SizedBox(height: 8),
@@ -145,10 +195,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     const SizedBox(height: 12),
 
                     // Revealed group rows
-                    ...gameState.revealedGroups.map(
-                      (g) => Padding(
+                    ...gameState.revealedGroups.asMap().entries.map(
+                      (entry) => Padding(
+                        key: ValueKey(entry.value.id),
                         padding: const EdgeInsets.only(bottom: 8),
-                        child: GroupRevealRow(key: ValueKey(g.id), group: g),
+                        child: _AnimatedRevealRow(
+                          index: entry.key,
+                          child: GroupRevealRow(group: entry.value),
+                        ),
                       ),
                     ),
 
@@ -176,66 +230,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   }
 }
 
-// ── Top bar ──────────────────────────────────────────────────────────────────
 
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.puzzleDate, required this.mistakeCount});
-
-  final String puzzleDate;
-  final int mistakeCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Row(
-        children: [
-          // Back button
-          GestureDetector(
-            onTap: () => context.go('/home'),
-            child: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: AppColors.onSurface,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Puzzle label
-          Expanded(
-            child: Text(
-              'CLUSTER',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.onBackground,
-                letterSpacing: 3,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-          // Mistake dots
-          Row(
-            children: List.generate(4, (i) {
-              final used = i < mistakeCount;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: used
-                        ? AppColors.mistakeUsed
-                        : AppColors.mistakeEmpty,
-                  ),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ── Word grid ─────────────────────────────────────────────────────────────────
 
@@ -264,10 +259,8 @@ class _WordGrid extends ConsumerWidget {
         final isSelected = gameState.selectedWords.contains(word);
         final shake = gameState.shouldShake && isSelected;
 
-        return AnimatedScale(
-          scale: isSelected ? 1.04 : 1.0,
-          duration: const Duration(milliseconds: 120),
-          curve: Curves.easeOut,
+        return _SpringScaleTile(
+          isSelected: isSelected,
           child: WordTile(
             key: ValueKey(word),
             word: word,
@@ -494,6 +487,132 @@ class _BottomBar extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Animations ────────────────────────────────────────────────────────────────
+
+class _AnimatedRevealRow extends StatefulWidget {
+  const _AnimatedRevealRow({
+    required this.index,
+    required this.child,
+  });
+
+  final int index;
+  final Widget child;
+
+  @override
+  State<_AnimatedRevealRow> createState() => _AnimatedRevealRowState();
+}
+
+class _AnimatedRevealRowState extends State<_AnimatedRevealRow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 400),
+  );
+
+  late final Animation<double> _fade = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+  );
+
+  late final Animation<Offset> _slide = Tween<Offset>(
+    begin: const Offset(0, 0.08),
+    end: Offset.zero,
+  ).animate(CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+  ));
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: widget.index * 60), () {
+      if (mounted) {
+        _controller.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(
+        position: _slide,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _SpringScaleTile extends StatefulWidget {
+  const _SpringScaleTile({
+    required this.isSelected,
+    required this.child,
+  });
+
+  final bool isSelected;
+  final Widget child;
+
+  @override
+  State<_SpringScaleTile> createState() => _SpringScaleTileState();
+}
+
+class _SpringScaleTileState extends State<_SpringScaleTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    upperBound: double.infinity,
+    lowerBound: double.negativeInfinity,
+    value: widget.isSelected ? 1.04 : 1.0,
+  );
+
+  @override
+  void didUpdateWidget(_SpringScaleTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isSelected != oldWidget.isSelected) {
+      final target = widget.isSelected ? 1.04 : 1.0;
+      const spring = SpringDescription(
+        mass: 1.0,
+        stiffness: 400.0,
+        damping: 5.0, 
+      );
+      final simulation = SpringSimulation(
+        spring,
+        _controller.value,
+        target,
+        0,
+      );
+      _controller.animateWith(simulation);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _controller.value,
+          child: child,
+        );
+      },
+      child: widget.child,
     );
   }
 }
