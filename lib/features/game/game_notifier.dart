@@ -53,6 +53,7 @@ class GameState {
     this.shouldShake = false,
     this.isOneAway = false,
     this.solveSequence = const [],
+    this.clearingWords = const [],
   });
 
   /// The puzzle being played (null before [GameNotifier.loadPuzzle] is called).
@@ -81,9 +82,13 @@ class GameState {
   /// Groups in the order they were solved (used for share-grid generation).
   final List<PuzzleGroup> solveSequence;
 
+  /// Words currently performing the lift and fade-out animation on a correct guess.
+  final List<String> clearingWords;
+
   // ── Derived ───────────────────────────────────────────────────────────────
 
-  bool get canSubmit => selectedWords.length == 4 && !shouldShake;
+  bool get canSubmit =>
+      selectedWords.length == 4 && !shouldShake && clearingWords.isEmpty;
 
   int get groupsFound => revealedGroups.length;
 
@@ -99,6 +104,7 @@ class GameState {
     bool? shouldShake,
     bool? isOneAway,
     List<PuzzleGroup>? solveSequence,
+    List<String>? clearingWords,
   }) {
     return GameState(
       puzzle: puzzle ?? this.puzzle,
@@ -110,6 +116,7 @@ class GameState {
       shouldShake: shouldShake ?? this.shouldShake,
       isOneAway: isOneAway ?? this.isOneAway,
       solveSequence: solveSequence ?? this.solveSequence,
+      clearingWords: clearingWords ?? this.clearingWords,
     );
   }
 }
@@ -197,7 +204,7 @@ class GameNotifier extends _$GameNotifier {
   ///
   /// Correct → reveals the group, removes tiles, advances phase.
   /// Wrong   → increments mistake counter, sets [shouldShake].
-  void submitGuess() {
+  Future<void> submitGuess({bool disableAnimations = false}) async {
     final s = state;
     if (!s.canSubmit) return;
     if (s.puzzle == null) return;
@@ -216,7 +223,13 @@ class GameNotifier extends _$GameNotifier {
     }
 
     if (hit != null) {
-      _handleCorrect(s, hit);
+      if (disableAnimations) {
+        _handleCorrect(s, hit);
+      } else {
+        state = s.copyWith(clearingWords: s.selectedWords);
+        await Future.delayed(const Duration(milliseconds: 320));
+        _handleCorrect(state, hit);
+      }
     } else {
       _handleWrong(s, selected);
     }
@@ -275,7 +288,9 @@ class GameNotifier extends _$GameNotifier {
   // ── Private helpers ───────────────────────────────────────────────────────
 
   void _handleCorrect(GameState s, PuzzleGroup hit) {
-    final selected = Set<String>.from(s.selectedWords);
+    final selected = Set<String>.from(
+      s.selectedWords.isNotEmpty ? s.selectedWords : s.clearingWords,
+    );
     final newRevealed = [...s.revealedGroups, hit];
     final newRemaining = s.remainingWords
         .where((w) => !selected.contains(w))
@@ -287,6 +302,7 @@ class GameNotifier extends _$GameNotifier {
       revealedGroups: newRevealed,
       remainingWords: newRemaining,
       selectedWords: const [],
+      clearingWords: const [],
       solveSequence: newSeq,
       phase: solved ? GamePhase.solved : GamePhase.idle,
       shouldShake: false,

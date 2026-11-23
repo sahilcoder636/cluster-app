@@ -1,5 +1,6 @@
-package com.example.money_maker_app
+package com.thecodez.cluster
 
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity()
+

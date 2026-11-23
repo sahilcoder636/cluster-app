@@ -1,16 +1,21 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-
 import '../../core/theme.dart';
 
-/// A single tappable word tile in the 4×4 puzzle grid.
+/// A single word tile in the 4x4 game grid.
 ///
-/// Supports:
-///   - Normal / Selected visual states (animated with [AnimatedContainer])
-///   - Shake animation when [shake] flips from false → true
-///   - Press scale animation for tactile feedback
+/// Selected state: solid ink fill with paper-coloured text.
+/// Unselected state: paper fill with ink text.
+/// Horizontal shake feedback on incorrect submission.
+///
+/// Survives large text scales without overflowing by using
+/// FittedBox(scaleDown) with min font size protection.
 class WordTile extends StatefulWidget {
+  final String word;
+  final bool isSelected;
+  final bool shake;
+  final VoidCallback onTap;
+
   const WordTile({
     super.key,
     required this.word,
@@ -19,34 +24,29 @@ class WordTile extends StatefulWidget {
     required this.onTap,
   });
 
-  final String word;
-  final bool isSelected;
-
-  /// Setting this to true triggers a dampened-sine shake animation.
-  final bool shake;
-
-  final VoidCallback onTap;
-
   @override
   State<WordTile> createState() => _WordTileState();
 }
 
 class _WordTileState extends State<WordTile>
     with SingleTickerProviderStateMixin {
-  // ── Shake controller ─────────────────────────────────────────────────────
-  late final AnimationController _shakeCtrl = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 500),
-  );
-
-  // ── Press scale ───────────────────────────────────────────────────────────
+  late final AnimationController _shakeCtrl;
   bool _pressed = false;
 
   @override
-  void didUpdateWidget(WordTile old) {
-    super.didUpdateWidget(old);
-    if (widget.shake && !old.shake) {
-      _shakeCtrl.forward(from: 0).then((_) => _shakeCtrl.reset());
+  void initState() {
+    super.initState();
+    _shakeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+  }
+
+  @override
+  void didUpdateWidget(WordTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shake && !oldWidget.shake) {
+      _shakeCtrl.forward(from: 0);
     }
   }
 
@@ -56,12 +56,28 @@ class _WordTileState extends State<WordTile>
     super.dispose();
   }
 
-  // Dampened sine wave: x(t) = A·sin(2π·f·t)·e^(−k·t)
-  double _offsetX(double t) =>
-      8 * sin(2 * pi * 3 * t) * exp(-4 * t);
+  /// Dampened sine-wave shake offset in pixels.
+  double _offsetX(double t) => sin(t * pi * 6) * (1 - t) * 8.0;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Selected: ink fill, paper text. Unselected: paper/tile fill, ink text.
+    final Color tileBg;
+    final Color tileTextColor;
+    final Color borderColor;
+
+    if (widget.isSelected) {
+      tileBg = isDark ? AppColors.darkInk : AppColors.ink;
+      tileTextColor = isDark ? AppColors.darkBg : AppColors.paper;
+      borderColor = isDark ? AppColors.darkInk : AppColors.ink;
+    } else {
+      tileBg = isDark ? const Color(0xFF25211B) : const Color(0xFFFAF6EE);
+      tileTextColor = isDark ? const Color(0xFFEDE5D5) : AppColors.ink;
+      borderColor = isDark ? const Color(0xFF3D362C) : const Color(0xFFD6CEBD);
+    }
+
     return AnimatedBuilder(
       animation: _shakeCtrl,
       builder: (context, child) {
@@ -76,46 +92,52 @@ class _WordTileState extends State<WordTile>
         },
         onTapCancel: () => setState(() => _pressed = false),
         child: AnimatedScale(
-          scale: _pressed ? 0.93 : 1.0,
+          scale: _pressed ? 0.94 : 1.0,
           duration: const Duration(milliseconds: 80),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 140),
             curve: Curves.easeOut,
             decoration: BoxDecoration(
-              color: widget.isSelected
-                  ? AppColors.tileSelected
-                  : AppColors.surfaceTile,
-              borderRadius: BorderRadius.circular(14),
+              color: tileBg,
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: widget.isSelected
-                    ? AppColors.tileSelectedBorder
-                    : Colors.transparent,
-                width: 2,
+                color: borderColor,
+                width: 1.5,
               ),
-              boxShadow: widget.isSelected
-                  ? [
-                      BoxShadow(
-                        color: AppColors.accent.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
+              boxShadow: [
+                if (!widget.isSelected)
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+              ],
             ),
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Text(
-                  widget.word,
-                  style: const TextStyle(
-                    color: AppColors.onTile,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    letterSpacing: -0.5,
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: MediaQuery.textScalerOf(context).clamp(
+                      minScaleFactor: 10.0 / 14.0, // min font size floor (10pt)
+                      maxScaleFactor: 2.5,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      widget.word,
+                      style: TextStyle(
+                        fontFamily: AppFonts.ui,
+                        color: tileTextColor,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        letterSpacing: -0.2,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                    ),
+                  ),
                 ),
               ),
             ),

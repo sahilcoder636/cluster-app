@@ -1,73 +1,96 @@
 import 'package:flutter/material.dart';
 
-/// Central color palette and theme for Cluster.
+/// Central color palette, design tokens, and theme definitions for Cluster.
 ///
-/// Dark-first design: deep navy background, muted surfaces,
-/// vivid difficulty colors, indigo accent.
+/// Features a printed editorial aesthetic with tactile depth:
+/// - Light theme: paper (#F4EFE6), warm surface (#FBF8F2), ink (#1B1A17),
+///   muted secondary (#6F6A5F), hairline borders (#D9D2C3), terracotta accent (#C2452D).
+/// - Dark theme: warm charcoal bg (#171512), elevated surface (#211E1A),
+///   cream ink (#EFE9DD), warm muted (#9E9789), hairline (#332F28), terracotta accent (#C2452D).
+/// - Group colors (muted printed ink): mustard (#E0B04A), sage (#8FAF8A),
+///   dusty blue (#7FA3C7), terracotta (#C77D6B).
+/// - Typography: Fraunces for display (wordmark, headings, group titles),
+///   Instrument Sans for UI and tiles.
 class AppColors {
   AppColors._();
 
-  // ── Background layers ──────────────────────────────────────────
-  static const Color background = Color(0xFF0D0D1F);
-  static const Color surface = Color(0xFF16162A);
-  static const Color surfaceElevated = Color(0xFF1F1F38);
-  static const Color surfaceTile = Color(0xFF252547);
+  // ── Light Theme Tokens ─────────────────────────────────────────
+  static const Color paper = Color(0xFFF4EFE6);
+  static const Color surfaceLight = Color(0xFFFBF8F2);
+  static const Color ink = Color(0xFF1B1A17);
+  static const Color muted = Color(0xFF6F6A5F);
+  static const Color hairline = Color(0xFFD9D2C3);
+  static const Color accentColor = Color(0xFFC2452D);
 
-  // ── Text ───────────────────────────────────────────────────────
-  static const Color onBackground = Color(0xFFE8E8F5);
-  static const Color onSurface = Color(0xFFB0B0CC);
-  static const Color onTile = Color(0xFFFFFFFF);
+  // ── Group Colors (Muted Printed Ink) ───────────────────────────
+  static const Color mustard = Color(0xFFD9B04C);
+  static const Color sage = Color(0xFFA3C09B);
+  static const Color dustyBlue = Color(0xFF8FB0CF);
+  static const Color terracotta = Color(0xFFD9907F);
 
-  // ── Accent ─────────────────────────────────────────────────────
-  static const Color accent = Color(0xFF7B6CF6);
-  static const Color accentLight = Color(0xFF9D91F8);
-  static const Color tileSelected = Color(0xFF5C54D4);
-  static const Color tileSelectedBorder = Color(0xFF7B6CF6);
+  // ── Dark Theme Tokens (Warm Charcoal) ──────────────────────────
+  static const Color darkBg = Color(0xFF171512);
+  static const Color darkSurface = Color(0xFF211E1A);
+  static const Color darkInk = Color(0xFFEFE9DD);
+  static const Color darkMuted = Color(0xFF9E9789);
+  static const Color darkHairline = Color(0xFF332F28);
+  static const Color darkAccent = Color(0xFFC2452D);
 
-  // ── Difficulty colors ──────────────────────────────────────────
-  /// Difficulty 1 → green
-  static const Color diff1 = Color(0xFF4CAF50);
+  // Darkened group hues for dark mode:
+  static const Color darkMustard = Color(0xFFC69735);
+  static const Color darkSage = Color(0xFF72936D);
+  static const Color darkDustyBlue = Color(0xFF6488AC);
+  static const Color darkTerracotta = Color(0xFFAF6351);
 
-  /// Difficulty 2 → blue
-  static const Color diff2 = Color(0xFF2196F3);
+  // ── Compatibility Accessors ────────────────────────────────────
+  static const Color background = paper;
+  static const Color surface = surfaceLight;
+  static const Color surfaceElevated = hairline;
+  static const Color surfaceTile = Color(0xFFEAE4D9);
 
-  /// Difficulty 3 → amber/yellow
-  static const Color diff3 = Color(0xFFFFC107);
+  static const Color onBackground = ink;
+  static const Color onSurface = muted;
+  static const Color onTile = ink;
 
-  /// Difficulty 4 → red
-  static const Color diff4 = Color(0xFFEF5350);
+  static const Color accent = accentColor;
+  static const Color accentLight = Color(0xFFD96B54);
+  static const Color tileSelected = ink;
+  static const Color tileSelectedBorder = ink;
 
-  // ── Mistakes ───────────────────────────────────────────────────
-  static const Color mistakeUsed = Color(0xFFEF5350);
-  static const Color mistakeEmpty = Color(0xFF3A3A5C);
+  static const Color diff1 = mustard;
+  static const Color diff2 = sage;
+  static const Color diff3 = dustyBlue;
+  static const Color diff4 = terracotta;
 
-  // ── Streak card gradient ───────────────────────────────────────
+  static const Color mistakeUsed = accentColor;
+  static const Color mistakeEmpty = hairline;
+
+  // Gradients
   static const Gradient streakGradient = LinearGradient(
-    colors: [Color(0xFF7B6CF6), Color(0xFFB06CF6)],
+    colors: [Color(0xFFC2452D), Color(0xFFD96B54)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // ── Daily card gradient ────────────────────────────────────────
   static const Gradient dailyGradient = LinearGradient(
-    colors: [Color(0xFF1F1F38), Color(0xFF2A2A50)],
+    colors: [Color(0xFFFBF8F2), Color(0xFFF3ECE0)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  /// Returns the fill color for a given difficulty (1–4).
-  static Color difficultyColor(int difficulty) {
+  /// Returns the fill color for a given difficulty (1-4).
+  static Color difficultyColor(int difficulty, [Brightness brightness = Brightness.light]) {
     switch (difficulty) {
       case 1:
-        return diff1;
+        return mustard;
       case 2:
-        return diff2;
+        return sage;
       case 3:
-        return diff3;
+        return dustyBlue;
       case 4:
-        return diff4;
+        return terracotta;
       default:
-        return diff1;
+        return mustard;
     }
   }
 
@@ -75,57 +98,109 @@ class AppColors {
   static String difficultyEmoji(int difficulty) {
     switch (difficulty) {
       case 1:
-        return '🟩';
-      case 2:
-        return '🟦';
-      case 3:
         return '🟨';
+      case 2:
+        return '🟩';
+      case 3:
+        return '🟦';
       case 4:
         return '🟥';
       default:
         return '⬜';
     }
   }
+
+  // ── Context Helpers ────────────────────────────────────────────
+  static bool isDark(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
+
+  static Color cardBg(BuildContext context) =>
+      isDark(context) ? darkSurface : surfaceLight;
+
+  static Color textColor(BuildContext context) =>
+      isDark(context) ? darkInk : ink;
+
+  static Color mutedColor(BuildContext context) =>
+      isDark(context) ? darkMuted : muted;
+
+  static Color borderColor(BuildContext context) =>
+      isDark(context) ? const Color(0xFF332F28) : hairline;
+
+  static Color tileBg(BuildContext context, {bool isSelected = false}) {
+    if (isSelected) {
+      return isDark(context) ? const Color(0xFF3B3327) : const Color(0xFF28241D);
+    }
+    return isDark(context) ? const Color(0xFF25211B) : const Color(0xFFFAF6EE);
+  }
+
+  static Color tileBorder(BuildContext context, {bool isSelected = false}) {
+    if (isSelected) return accent;
+    return isDark(context) ? const Color(0xFF3D362C) : const Color(0xFFD6CEBD);
+  }
+
+  static Color tileText(BuildContext context, {bool isSelected = false}) {
+    if (isSelected) return Colors.white;
+    return isDark(context) ? const Color(0xFFEDE5D5) : ink;
+  }
 }
 
-/// Builds the app-wide [ThemeData].
-ThemeData buildAppTheme() {
+/// Font family constants.
+class AppFonts {
+  AppFonts._();
+
+  /// Display font for wordmark, headings, and group titles.
+  static const String display = 'Fraunces';
+
+  /// Clean, readable sans-serif for UI, buttons, body, and tiles.
+  static const String ui = 'Instrument Sans';
+}
+
+/// Builds the light [ThemeData] (primary theme).
+ThemeData buildLightTheme() {
   const colorScheme = ColorScheme(
-    brightness: Brightness.dark,
+    brightness: Brightness.light,
     primary: AppColors.accent,
     onPrimary: Colors.white,
-    secondary: AppColors.accentLight,
-    onSecondary: Colors.white,
-    error: AppColors.diff4,
+    secondary: AppColors.mustard,
+    onSecondary: AppColors.ink,
+    error: AppColors.terracotta,
     onError: Colors.white,
-    surface: AppColors.surface,
-    onSurface: AppColors.onSurface,
+    surface: AppColors.surfaceLight,
+    onSurface: AppColors.ink,
+    outline: AppColors.hairline,
   );
 
   return ThemeData(
     colorScheme: colorScheme,
-    scaffoldBackgroundColor: AppColors.background,
+    scaffoldBackgroundColor: AppColors.paper,
+    fontFamily: AppFonts.ui,
     useMaterial3: true,
 
     // ── AppBar ──────────────────────────────────────────────────
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.background,
-      foregroundColor: AppColors.onBackground,
+      backgroundColor: AppColors.paper,
+      foregroundColor: AppColors.ink,
       elevation: 0,
+      scrolledUnderElevation: 0,
       centerTitle: true,
       titleTextStyle: TextStyle(
-        color: AppColors.onBackground,
-        fontSize: 18,
-        fontWeight: FontWeight.w700,
+        fontFamily: AppFonts.display,
+        color: AppColors.ink,
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
         letterSpacing: 2,
       ),
     ),
 
     // ── Card ────────────────────────────────────────────────────
     cardTheme: CardThemeData(
-      color: AppColors.surface,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: AppColors.surfaceLight,
+      elevation: 1,
+      shadowColor: Colors.black.withValues(alpha: 0.06),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(color: AppColors.hairline, width: 1.5),
+      ),
     ),
 
     // ── ElevatedButton ──────────────────────────────────────────
@@ -133,49 +208,101 @@ ThemeData buildAppTheme() {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.accent,
         foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        elevation: 2,
+        shadowColor: AppColors.accent.withValues(alpha: 0.35),
+        minimumSize: const Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: const TextStyle(
+          fontFamily: AppFonts.ui,
           fontSize: 16,
           fontWeight: FontWeight.w700,
-          letterSpacing: 0.5,
+          letterSpacing: 0.4,
+        ),
+      ),
+    ),
+
+    // ── OutlinedButton ──────────────────────────────────────────
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.ink,
+        elevation: 0,
+        minimumSize: const Size(double.infinity, 50),
+        side: const BorderSide(color: AppColors.hairline, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.ui,
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
         ),
       ),
     ),
 
     // ── TextButton ──────────────────────────────────────────────
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(foregroundColor: AppColors.accentLight),
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.accent,
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.ui,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     ),
 
-    // ── Text ────────────────────────────────────────────────────
+    // ── Typography ──────────────────────────────────────────────
     textTheme: const TextTheme(
       displayLarge: TextStyle(
-        color: AppColors.onBackground,
-        fontSize: 48,
+        fontFamily: AppFonts.display,
+        color: AppColors.ink,
+        fontSize: 44,
         fontWeight: FontWeight.w900,
-        letterSpacing: 4,
+        letterSpacing: 3,
       ),
       displayMedium: TextStyle(
-        color: AppColors.onBackground,
+        fontFamily: AppFonts.display,
+        color: AppColors.ink,
         fontSize: 32,
         fontWeight: FontWeight.w800,
-        letterSpacing: 2,
+        letterSpacing: 1.5,
+      ),
+      displaySmall: TextStyle(
+        fontFamily: AppFonts.display,
+        color: AppColors.ink,
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
+      ),
+      headlineMedium: TextStyle(
+        fontFamily: AppFonts.display,
+        color: AppColors.ink,
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
       ),
       titleLarge: TextStyle(
-        color: AppColors.onBackground,
-        fontSize: 20,
+        fontFamily: AppFonts.display,
+        color: AppColors.ink,
+        fontSize: 18,
         fontWeight: FontWeight.w700,
       ),
       titleMedium: TextStyle(
-        color: AppColors.onBackground,
+        fontFamily: AppFonts.ui,
+        color: AppColors.ink,
         fontSize: 16,
         fontWeight: FontWeight.w600,
       ),
-      bodyLarge: TextStyle(color: AppColors.onSurface, fontSize: 15),
-      bodyMedium: TextStyle(color: AppColors.onSurface, fontSize: 13),
+      bodyLarge: TextStyle(
+        fontFamily: AppFonts.ui,
+        color: AppColors.ink,
+        fontSize: 15,
+      ),
+      bodyMedium: TextStyle(
+        fontFamily: AppFonts.ui,
+        color: AppColors.muted,
+        fontSize: 13,
+      ),
       labelLarge: TextStyle(
-        color: AppColors.onBackground,
+        fontFamily: AppFonts.ui,
+        color: AppColors.ink,
         fontSize: 14,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.5,
@@ -184,15 +311,220 @@ ThemeData buildAppTheme() {
 
     // ── Divider ─────────────────────────────────────────────────
     dividerTheme: const DividerThemeData(
-      color: Color(0xFF2A2A48),
+      color: AppColors.hairline,
       thickness: 1,
     ),
 
-    // ── SnackBar ─────────────────────────────────────────────────
-    snackBarTheme: const SnackBarThemeData(
-      backgroundColor: AppColors.surfaceElevated,
-      contentTextStyle: TextStyle(color: AppColors.onBackground),
+    // ── Dialog ──────────────────────────────────────────────────
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.surfaceLight,
+      elevation: 4,
+      shadowColor: Colors.black.withValues(alpha: 0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(color: AppColors.hairline, width: 1.5),
+      ),
+    ),
+
+    // ── SnackBar ────────────────────────────────────────────────
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.ink,
+      contentTextStyle: const TextStyle(
+        fontFamily: AppFonts.ui,
+        color: AppColors.paper,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       behavior: SnackBarBehavior.floating,
     ),
   );
 }
+
+/// Builds the dark [ThemeData] (warm charcoal theme).
+ThemeData buildDarkTheme() {
+  const colorScheme = ColorScheme(
+    brightness: Brightness.dark,
+    primary: AppColors.darkAccent,
+    onPrimary: Colors.white,
+    secondary: AppColors.darkMustard,
+    onSecondary: AppColors.darkInk,
+    error: AppColors.darkTerracotta,
+    onError: Colors.white,
+    surface: AppColors.darkSurface,
+    onSurface: AppColors.darkInk,
+    outline: AppColors.darkHairline,
+  );
+
+  return ThemeData(
+    colorScheme: colorScheme,
+    scaffoldBackgroundColor: AppColors.darkBg,
+    fontFamily: AppFonts.ui,
+    useMaterial3: true,
+
+    // ── AppBar ──────────────────────────────────────────────────
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.darkBg,
+      foregroundColor: AppColors.darkInk,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: true,
+      titleTextStyle: TextStyle(
+        fontFamily: AppFonts.display,
+        color: AppColors.darkInk,
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 2,
+      ),
+    ),
+
+    // ── Card ────────────────────────────────────────────────────
+    cardTheme: CardThemeData(
+      color: AppColors.darkSurface,
+      elevation: 2,
+      shadowColor: Colors.black.withValues(alpha: 0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(color: Color(0xFF332F28), width: 1.5),
+      ),
+    ),
+
+    // ── ElevatedButton ──────────────────────────────────────────
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.darkAccent,
+        foregroundColor: Colors.white,
+        elevation: 3,
+        shadowColor: AppColors.darkAccent.withValues(alpha: 0.4),
+        minimumSize: const Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.ui,
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
+        ),
+      ),
+    ),
+
+    // ── OutlinedButton ──────────────────────────────────────────
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.darkInk,
+        elevation: 0,
+        minimumSize: const Size(double.infinity, 50),
+        side: const BorderSide(color: Color(0xFF453E34), width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.ui,
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
+        ),
+      ),
+    ),
+
+    // ── TextButton ──────────────────────────────────────────────
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.accentLight,
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.ui,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+
+    // ── Typography ──────────────────────────────────────────────
+    textTheme: const TextTheme(
+      displayLarge: TextStyle(
+        fontFamily: AppFonts.display,
+        color: AppColors.darkInk,
+        fontSize: 44,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 3,
+      ),
+      displayMedium: TextStyle(
+        fontFamily: AppFonts.display,
+        color: AppColors.darkInk,
+        fontSize: 32,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.5,
+      ),
+      displaySmall: TextStyle(
+        fontFamily: AppFonts.display,
+        color: AppColors.darkInk,
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
+      ),
+      headlineMedium: TextStyle(
+        fontFamily: AppFonts.display,
+        color: AppColors.darkInk,
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+      ),
+      titleLarge: TextStyle(
+        fontFamily: AppFonts.display,
+        color: AppColors.darkInk,
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+      ),
+      titleMedium: TextStyle(
+        fontFamily: AppFonts.ui,
+        color: AppColors.darkInk,
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+      bodyLarge: TextStyle(
+        fontFamily: AppFonts.ui,
+        color: AppColors.darkInk,
+        fontSize: 15,
+      ),
+      bodyMedium: TextStyle(
+        fontFamily: AppFonts.ui,
+        color: AppColors.darkMuted,
+        fontSize: 13,
+      ),
+      labelLarge: TextStyle(
+        fontFamily: AppFonts.ui,
+        color: AppColors.darkInk,
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.5,
+      ),
+    ),
+
+    // ── Divider ─────────────────────────────────────────────────
+    dividerTheme: const DividerThemeData(
+      color: Color(0xFF332F28),
+      thickness: 1,
+    ),
+
+    // ── Dialog ──────────────────────────────────────────────────
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.darkSurface,
+      elevation: 4,
+      shadowColor: Colors.black.withValues(alpha: 0.4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(color: Color(0xFF332F28), width: 1.5),
+      ),
+    ),
+
+    // ── SnackBar ────────────────────────────────────────────────
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.darkSurface,
+      contentTextStyle: const TextStyle(
+        fontFamily: AppFonts.ui,
+        color: AppColors.darkInk,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(color: Color(0xFF332F28), width: 1.5),
+      ),
+      behavior: SnackBarBehavior.floating,
+    ),
+  );
+}
+
+/// Backward compatibility alias — returns the primary light theme.
+ThemeData buildAppTheme() => buildLightTheme();

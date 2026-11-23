@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 import '../../core/ad_service.dart';
 import '../../core/theme.dart';
@@ -28,14 +31,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Load banner only for free users; premium check is best-effort here.
-    final isPremium =
-        ref.read(premiumProvider).maybeWhen(data: (v) => v, orElse: () => false);
+    final isPremium = ref
+        .read(premiumProvider)
+        .maybeWhen(data: (v) => v, orElse: () => false);
     if (!isPremium) {
-      AdService.instance.loadBanner(onLoaded: () { if (mounted) setState(() {}); });
+      AdService.instance.loadBanner(
+        onLoaded: () {
+          if (mounted) setState(() {});
+        },
+      );
     }
 
-    // Ask for notification permission once on first launch.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeRequestNotificationPermission();
     });
@@ -43,28 +49,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _maybeRequestNotificationPermission() async {
     final box = Hive.box(StreakService.boxName);
-    final alreadyAsked = box.get(_notificationAskedKey, defaultValue: false) as bool;
+    final alreadyAsked =
+        box.get(_notificationAskedKey, defaultValue: false) as bool;
     if (alreadyAsked) return;
 
-    // Wait 2 seconds so the user has a moment to look at the home screen.
     await Future<void>.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
-    final granted =
-        await NotificationService.instance.requestPermission(context);
+    final granted = await NotificationService.instance.requestPermission(
+      context,
+    );
     if (granted) {
       await NotificationService.instance.scheduleDailyReminder();
     }
 
-    // Record that we've asked, regardless of the outcome.
     await box.put(_notificationAskedKey, true);
   }
 
-  // ── Pack tap handlers ─────────────────────────────────────────────────────
+  // -- Pack tap handlers ----------------------------------------------------
 
-  Future<void> _onPackTap(String packName, {required bool isPremiumPack}) async {
-    final isPremium =
-        ref.read(premiumProvider).maybeWhen(data: (v) => v, orElse: () => false);
+  Future<void> _onPackTap(
+    String packName, {
+    required bool isPremiumPack,
+  }) async {
+    final isPremium = ref
+        .read(premiumProvider)
+        .maybeWhen(data: (v) => v, orElse: () => false);
 
     if (isPremiumPack && !isPremium) {
       context.go('/premium');
@@ -73,14 +83,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final isCompleted = await ref.read(packCompletedProvider(packName).future);
     if (!mounted) return;
-    
+
     if (isCompleted) {
       final playAgain = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: AppColors.surfaceElevated,
-          title: const Text('Pack Completed', style: TextStyle(color: AppColors.onBackground)),
-          content: const Text('You have completed all puzzles in this pack. Do you want to play it again?', style: TextStyle(color: AppColors.onSurface)),
+          title: const Text(
+            'Pack Completed',
+            style: TextStyle(color: AppColors.onBackground),
+          ),
+          content: const Text(
+            'You have completed all puzzles in this pack. Do you want to play it again?',
+            style: TextStyle(color: AppColors.onSurface),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
@@ -109,7 +125,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              "You've completed all $displayName puzzles! More coming soon."),
+            "You've completed all $displayName puzzles! More coming soon.",
+          ),
         ),
       );
       return;
@@ -130,10 +147,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final todayAsync = ref.watch(todaysPuzzleProvider);
     final todayLabel = _formatDate(DateTime.now());
-    final isPremium = ref.watch(premiumProvider).maybeWhen(data: (v) => v, orElse: () => false);
+    final isPremium = ref
+        .watch(premiumProvider)
+        .maybeWhen(data: (v) => v, orElse: () => false);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: ValueListenableBuilder(
           valueListenable: Hive.box(StreakService.boxName).listenable(),
@@ -142,7 +161,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final hasShield = StreakService.instance.hasShield();
             return CustomScrollView(
               slivers: [
-                // ── Title section ──────────────────────────────────────────────
+                // -- Title section --------------------------------------------------------
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
@@ -151,12 +170,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         const _ShimmerTitle(),
                         const SizedBox(height: 4),
-                        const Text(
+                        Text(
                           'One puzzle. Every day.',
                           style: TextStyle(
-                            color: AppColors.onSurface,
+                            fontFamily: AppFonts.ui,
+                            color: AppColors.mutedColor(context),
                             fontSize: 14,
-                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.3,
                           ),
                         ),
                         const SizedBox(height: 28),
@@ -165,111 +186,111 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
 
-                // ── Streak card ────────────────────────────────────────────────
+                // -- Streak row -----------------------------------------------------------
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _StreakCard(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: _StreakRow(
                       streak: streak,
                       hasShield: hasShield,
                       isPremium: isPremium,
                     ),
                   ),
                 ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-            // ── Daily challenge card ───────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _DailyCard(
-                  dateLabel: todayLabel,
-                  todayAsync: todayAsync,
-                  onPlay: (puzzle) {
-                    ref.read(gameProvider.notifier).loadPuzzle(puzzle);
-                    context.go(
-                      '/game',
-                      extra: GameArgs(
-                        puzzle: puzzle,
-                        gameSource: GameSource.daily,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 28)),
-
-            // ── Section header ────────────────────────────────────────────
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(24, 0, 24, 12),
-                child: Text(
-                  'PRACTICE PACKS',
-                  style: TextStyle(
-                    color: AppColors.onSurface,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 2.5,
-                  ),
-                ),
-              ),
-            ),
-
-            // ── Practice packs grid ────────────────────────────────────────
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverGrid.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.4,
-                children: [
-                  _PackCard(
-                    packName: 'movies',
-                    emoji: '🎬',
-                    title: 'Movies',
-                    isLocked: false,
-                    onTap: () => _onPackTap('movies', isPremiumPack: false),
-                  ),
-                  _PackCard(
-                    packName: 'sports',
-                    emoji: '⚽',
-                    title: 'Sports',
-                    isLocked: false,
-                    onTap: () => _onPackTap('sports', isPremiumPack: false),
-                  ),
-                  _PackCard(
-                    packName: 'music',
-                    emoji: '🎵',
-                    title: 'Music',
-                    isLocked: !isPremium,
-                    onTap: () => _onPackTap('music', isPremiumPack: true),
-                  ),
-                  _PackCard(
-                    packName: 'food',
-                    emoji: '🍕',
-                    title: 'Food',
-                    isLocked: !isPremium,
-                    onTap: () => _onPackTap('food', isPremiumPack: true),
-                  ),
-                ],
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
-            // ── AdMob banner (free users only) ────────────────────────────
-            SliverToBoxAdapter(
-              child: isPremium
-                  ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: AdService.instance.bannerWidget(),
+                // -- Daily challenge card -------------------------------------------------
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _DailyCard(
+                      dateLabel: todayLabel,
+                      todayAsync: todayAsync,
+                      onPlay: (puzzle) {
+                        ref.read(gameProvider.notifier).loadPuzzle(puzzle);
+                        context.go(
+                          '/game',
+                          extra: GameArgs(
+                            puzzle: puzzle,
+                            gameSource: GameSource.daily,
+                          ),
+                        );
+                      },
                     ),
-            ),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 28)),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                // -- Section header -------------------------------------------------------
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(24, 0, 24, 12),
+                    child: Text(
+                      'PRACTICE PACKS',
+                      style: TextStyle(
+                        color: AppColors.onSurface,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2.5,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // -- Practice packs grid --------------------------------------------------
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverGrid.count(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.4,
+                    children: [
+                      _PackCard(
+                        packName: 'movies',
+                        icon: PhosphorIconsRegular.filmSlate,
+                        title: 'Movies',
+                        isLocked: false,
+                        onTap: () => _onPackTap('movies', isPremiumPack: false),
+                      ),
+                      _PackCard(
+                        packName: 'sports',
+                        icon: PhosphorIconsRegular.soccerBall,
+                        title: 'Sports',
+                        isLocked: false,
+                        onTap: () => _onPackTap('sports', isPremiumPack: false),
+                      ),
+                      _PackCard(
+                        packName: 'music',
+                        icon: PhosphorIconsRegular.musicNote,
+                        title: 'Music',
+                        isLocked: !isPremium,
+                        onTap: () => _onPackTap('music', isPremiumPack: true),
+                      ),
+                      _PackCard(
+                        packName: 'food',
+                        icon: PhosphorIconsRegular.forkKnife,
+                        title: 'Food',
+                        isLocked: !isPremium,
+                        onTap: () => _onPackTap('food', isPremiumPack: true),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+                // -- AdMob banner (free users only) ---------------------------------------
+                SliverToBoxAdapter(
+                  child: isPremium || !AdService.instance.isBannerLoaded
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: AdService.instance.bannerWidget(),
+                        ),
+                ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
               ],
             );
           },
@@ -280,12 +301,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   String _formatDate(DateTime dt) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     const days = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-      'Friday', 'Saturday', 'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
     ];
     final dayName = days[dt.weekday - 1];
     final monthName = months[dt.month - 1];
@@ -293,13 +329,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-
-// ─────────────────────────────────────────────────────────────────────────────
+// --------------------------------------------------------------------------
 // Sub-widgets
-// ─────────────────────────────────────────────────────────────────────────────
+// --------------------------------------------------------------------------
 
-class _StreakCard extends StatelessWidget {
-  const _StreakCard({
+/// Flat streak row: large numeral + "day streak" + small flame icon.
+class _StreakRow extends StatelessWidget {
+  const _StreakRow({
     required this.streak,
     required this.hasShield,
     required this.isPremium,
@@ -311,122 +347,138 @@ class _StreakCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        gradient: AppColors.streakGradient,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          const Text('🔥', style: TextStyle(fontSize: 32)),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Current streak',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+    final isDark = AppColors.isDark(context);
+    final inkColor = isDark ? AppColors.darkInk : AppColors.ink;
+    final mutedColor = isDark ? AppColors.darkMuted : AppColors.muted;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Large numeral
+        Text(
+          '$streak',
+          style: TextStyle(
+            fontFamily: AppFonts.display,
+            color: inkColor,
+            fontSize: 48,
+            fontWeight: FontWeight.w900,
+            height: 1.0,
+          ),
+        ),
+        const SizedBox(width: 10),
+        // Label column
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'day streak',
+                style: TextStyle(
+                  fontFamily: AppFonts.ui,
+                  color: mutedColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '$streak ${streak == 1 ? 'day' : 'days'}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                if (hasShield)
-                  const Row(
+              ),
+              if (hasShield)
+                Row(
+                  children: [
+                    PhosphorIcon(
+                      PhosphorIconsRegular.shieldCheck,
+                      color: Colors.blue,
+                      size: 13,
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'Streak protected',
+                      style: TextStyle(color: Colors.blue, fontSize: 11),
+                    ),
+                  ],
+                )
+              else if (isPremium)
+                GestureDetector(
+                  onTap: () => StreakService.instance.activateShield(),
+                  child: Row(
                     children: [
-                      Icon(Icons.shield_rounded, color: Colors.blue, size: 14),
-                      SizedBox(width: 4),
-                      Text(
-                        'Streak protected',
-                        style: TextStyle(color: Colors.blue, fontSize: 11),
+                      PhosphorIcon(
+                        PhosphorIconsRegular.shield,
+                        color: AppColors.accent,
+                        size: 13,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        'Activate shield',
+                        style: TextStyle(color: AppColors.accent, fontSize: 11),
                       ),
                     ],
-                  )
-                else if (isPremium)
-                  GestureDetector(
-                    onTap: () => StreakService.instance.activateShield(),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.shield_outlined,
-                            color: AppColors.accent, size: 14),
-                        SizedBox(width: 4),
-                        Text(
-                          'Activate shield',
-                          style: TextStyle(
-                              color: AppColors.accent, fontSize: 11),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          backgroundColor: AppColors.surface,
-                          title: const Text('Protect your streak',
-                              style: TextStyle(color: AppColors.onBackground)),
-                          content: const Text(
-                              'Watch a short ad to protect your streak for one missed day.',
-                              style: TextStyle(color: AppColors.onSurface)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(),
-                              child: const Text('Cancel'),
-                            ),
-                            ElevatedButton(
-                              onPressed: () async {
-                                Navigator.of(ctx).pop();
-                                final rewarded = await AdService.instance
-                                    .showRewarded();
-                                if (rewarded) {
-                                  await StreakService.instance.activateShield();
-                                }
-                              },
-                              child: const Text('Watch ad'),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    child: const Row(
-                      children: [
-                        Icon(Icons.shield_outlined,
-                            color: AppColors.onSurface, size: 14),
-                        SizedBox(width: 4),
-                        Text(
-                          'Protect your streak →',
-                          style: TextStyle(
-                              color: AppColors.onSurface, fontSize: 11),
-                        ),
-                      ],
-                    ),
                   ),
-              ],
-            ),
+                )
+              else
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: AppColors.surface,
+                        title: const Text(
+                          'Protect your streak \u2192',
+                          style: TextStyle(color: AppColors.onBackground),
+                        ),
+                        content: const Text(
+                          'Watch a short ad to protect your streak for one missed day.',
+                          style: TextStyle(color: AppColors.onSurface),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              Navigator.of(ctx).pop();
+                              final rewarded = await AdService.instance
+                                  .showRewarded();
+                              if (rewarded) {
+                                await StreakService.instance.activateShield();
+                              }
+                            },
+                            child: const Text('Watch ad'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      PhosphorIcon(
+                        PhosphorIconsRegular.shield,
+                        color: mutedColor,
+                        size: 13,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Protect your streak \u2192',
+                        style: TextStyle(color: mutedColor, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
-          const Icon(Icons.local_fire_department_rounded,
-              color: Colors.white54, size: 20),
-        ],
-      ),
+        ),
+        // Small flame icon
+        PhosphorIcon(
+          PhosphorIconsFill.flame,
+          color: AppColors.accent,
+          size: 22,
+        ),
+      ],
     );
   }
 }
 
-class _DailyCard extends StatelessWidget {
+class _DailyCard extends StatefulWidget {
   const _DailyCard({
     required this.dateLabel,
     required this.todayAsync,
@@ -438,87 +490,190 @@ class _DailyCard extends StatelessWidget {
   final void Function(dynamic puzzle) onPlay;
 
   @override
+  State<_DailyCard> createState() => _DailyCardState();
+}
+
+class _DailyCardState extends State<_DailyCard> {
+  Timer? _countdownTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  String _formatCountdown() {
+    final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final diff = tomorrow.isAfter(now)
+        ? tomorrow.difference(now)
+        : Duration.zero;
+    final hours = diff.inHours.toString().padLeft(2, '0');
+    final mins = (diff.inMinutes % 60).toString().padLeft(2, '0');
+    final secs = (diff.inSeconds % 60).toString().padLeft(2, '0');
+    return '$hours:$mins:$secs';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    final puzzle = widget.todayAsync.asData?.value;
+    final isPlayed =
+        puzzle != null &&
+        StreakService.instance.isPuzzlePlayed(puzzle.id as String);
+    final countdownStr = _formatCountdown();
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: AppColors.dailyGradient,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.surfaceElevated, width: 1),
+        color: Theme.of(context).cardTheme.color ?? AppColors.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          // hairline border
+          color: isDark ? AppColors.darkHairline : AppColors.hairline,
+          width: 0.75,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.calendar_today_rounded,
-                  color: AppColors.accentLight, size: 16),
-              const SizedBox(width: 8),
-              Text(
-                dateLabel,
-                style: const TextStyle(
-                  color: AppColors.accentLight,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
+              Row(
+                children: [
+                  PhosphorIcon(
+                    PhosphorIconsRegular.calendar,
+                    color: AppColors.accentLight,
+                    size: 15,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.dateLabel,
+                    style: const TextStyle(
+                      color: AppColors.accentLight,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
               ),
+              if (isPlayed)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.diff2.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PhosphorIcon(
+                        PhosphorIconsBold.check,
+                        size: 11,
+                        color: isDark ? AppColors.darkSage : AppColors.sage,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Solved today',
+                        style: TextStyle(
+                          fontFamily: AppFonts.ui,
+                          color: isDark ? AppColors.darkSage : AppColors.sage,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
+          // Serif (Fraunces) title -- always cream ink in dark mode
+          Text(
             'Daily Challenge',
             style: TextStyle(
-              color: AppColors.onBackground,
+              fontFamily: AppFonts.display,
+              color: isDark ? AppColors.darkInk : AppColors.ink,
               fontSize: 22,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            '16 words · 4 groups · 4 mistakes allowed',
-            style: TextStyle(color: AppColors.onSurface, fontSize: 12),
+          Text(
+            isPlayed
+                ? 'Next puzzle in $countdownStr'
+                : '16 words \u00B7 4 groups \u00B7 4 mistakes allowed',
+            style: TextStyle(
+              color: isPlayed
+                  ? (isDark ? AppColors.darkMuted : AppColors.muted)
+                  : AppColors.onSurface,
+              fontSize: 12,
+              fontWeight: isPlayed ? FontWeight.w600 : FontWeight.w400,
+              fontFeatures: isPlayed
+                  ? const [FontFeature.tabularFigures()]
+                  : null,
+            ),
           ),
-          const SizedBox(height: 16),
-          todayAsync.when(
-            loading: () => ElevatedButton(
-              onPressed: null,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white),
-                  ),
-                  SizedBox(width: 10),
-                  Text('Loading puzzle…'),
-                ],
+          if (!isPlayed) ...[
+            const SizedBox(height: 16),
+            widget.todayAsync.when(
+              loading: () => ElevatedButton(
+                onPressed: null,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Text('Loading puzzle\u2026'),
+                  ],
+                ),
               ),
-            ),
-            error: (e, _) => ElevatedButton(
-              onPressed: null,
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: AppColors.diff4),
-              child: const Text('No puzzle for today'),
-            ),
-            data: (puzzle) {
-              if (puzzle == null) {
-                return ElevatedButton(
-                  onPressed: null,
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.diff4),
-                  child: const Text('No puzzle scheduled'),
+              error: (e, _) => ElevatedButton(
+                onPressed: null,
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.diff4),
+                child: const Text('No puzzle for today'),
+              ),
+              data: (p) {
+                if (p == null) {
+                  return ElevatedButton(
+                    onPressed: null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.diff4,
+                    ),
+                    child: const Text('No puzzle scheduled'),
+                  );
+                }
+                return ElevatedButton.icon(
+                  onPressed: () => widget.onPlay(p),
+                  icon: PhosphorIcon(
+                    PhosphorIconsFill.play,
+                    size: 18,
+                  ),
+                  label: const Text("Play today's puzzle"),
                 );
-              }
-              return ElevatedButton.icon(
-                onPressed: () => onPlay(puzzle),
-                icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                label: const Text("Play today's puzzle"),
-              );
-            },
-          ),
+              },
+            ),
+          ],
         ],
       ),
     );
@@ -528,24 +683,25 @@ class _DailyCard extends StatelessWidget {
 class _PackCard extends ConsumerWidget {
   const _PackCard({
     required this.packName,
-    required this.emoji,
+    required this.icon,
     required this.title,
     required this.isLocked,
     required this.onTap,
   });
 
   final String packName;
-  final String emoji;
+  final PhosphorIconData icon;
   final String title;
   final bool isLocked;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isCompleted = ref.watch(packCompletedProvider(packName)).maybeWhen(
-      data: (v) => v,
-      orElse: () => false,
-    );
+    final isDark = AppColors.isDark(context);
+    final isCompleted = ref
+        .watch(packCompletedProvider(packName))
+        .maybeWhen(data: (v) => v, orElse: () => false);
+    final inkColor = isDark ? AppColors.darkInk : AppColors.ink;
 
     return GestureDetector(
       onTap: onTap,
@@ -554,9 +710,12 @@ class _PackCard extends ConsumerWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.surfaceElevated, width: 1),
+              color: isDark ? AppColors.darkSurface : AppColors.surfaceLight,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isDark ? AppColors.darkHairline : AppColors.hairline,
+                width: 0.75,
+              ),
             ),
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -565,40 +724,27 @@ class _PackCard extends ConsumerWidget {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(emoji, style: const TextStyle(fontSize: 28)),
+                    PhosphorIcon(icon, color: inkColor, size: 26),
                     if (isLocked)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceElevated,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.lock_outline_rounded,
-                                size: 10, color: AppColors.onSurface),
-                            SizedBox(width: 3),
-                            Text(
-                              'PRO',
-                              style: TextStyle(
-                                color: AppColors.onSurface,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                          ],
+                      // Small accent-colored "PRO" text label \u2014 no pill
+                      const Text(
+                        'PRO',
+                        style: TextStyle(
+                          color: AppColors.accent,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.0,
+                          fontFamily: AppFonts.ui,
                         ),
                       ),
                   ],
                 ),
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: AppColors.onBackground,
+                  style: TextStyle(
+                    color: inkColor,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -616,7 +762,11 @@ class _PackCard extends ConsumerWidget {
                   shape: BoxShape.circle,
                 ),
                 padding: const EdgeInsets.all(4),
-                child: const Icon(Icons.check, size: 12, color: Colors.white),
+                child: PhosphorIcon(
+                  PhosphorIconsBold.check,
+                  size: 10,
+                  color: Colors.white,
+                ),
               ),
             ),
         ],
@@ -625,59 +775,21 @@ class _PackCard extends ConsumerWidget {
   }
 }
 
-class _ShimmerTitle extends StatefulWidget {
+class _ShimmerTitle extends StatelessWidget {
   const _ShimmerTitle();
 
   @override
-  State<_ShimmerTitle> createState() => _ShimmerTitleState();
-}
-
-class _ShimmerTitleState extends State<_ShimmerTitle> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final slide = -3.0 + _controller.value * 4.0;
-        return ShaderMask(
-          shaderCallback: (bounds) => LinearGradient(
-            begin: Alignment(slide, 0),
-            end: Alignment(slide + 2.0, 0),
-            colors: const [
-              AppColors.accent,
-              AppColors.accentLight,
-              AppColors.accent,
-            ],
-            stops: const [0.0, 0.5, 1.0],
-          ).createShader(bounds),
-          child: const Text(
-            'CLUSTER',
-            style: TextStyle(
-              fontSize: 44,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 6,
-              color: Colors.white,
-            ),
-          ),
-        );
-      },
+    final isDark = AppColors.isDark(context);
+    return Text(
+      'CLUSTER',
+      style: TextStyle(
+        fontFamily: AppFonts.display,
+        fontSize: 44,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 4.0,
+        color: isDark ? AppColors.darkInk : AppColors.ink,
+      ),
     );
   }
 }

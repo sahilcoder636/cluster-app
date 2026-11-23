@@ -61,7 +61,9 @@ dependencies:
   # Local push notifications
   flutter_local_notifications: ^18.0.0
   timezone: ^0.10.0
+  phosphoricons_flutter: ^1.1.1
 
+  # Phosphor icon set
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -95,3 +97,15 @@ flutter:
     - assets/packs/sports.json
     - assets/packs/music.json
     - assets/packs/food.json
+
+  fonts:
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces.ttf
+        - asset: assets/fonts/Fraunces-Italic.ttf
+          style: italic
+    - family: Instrument Sans
+      fonts:
+        - asset: assets/fonts/InstrumentSans.ttf
+        - asset: assets/fonts/InstrumentSans-Italic.ttf
+          style: italic

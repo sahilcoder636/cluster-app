@@ -56,7 +56,7 @@ class PremiumNotifier extends _$PremiumNotifier {
         throw Exception('No packages found in current offering');
       }
 
-      final result = await Purchases.purchasePackage(pkg);
+      final result = await Purchases.purchase(PurchaseParams.package(pkg));
       final isActive = result.customerInfo.entitlements.active.containsKey(
         _entitlementId,
       );

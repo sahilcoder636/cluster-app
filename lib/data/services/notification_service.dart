@@ -58,7 +58,7 @@ class NotificationService {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('Stay in your streak 🔥'),
+        title: const Text('Stay in your streak \u{1F525}'),
         content: const Text(
           "Get a daily reminder when today's Cluster is ready.",
         ),
@@ -111,7 +111,7 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       _notificationId,
-      'Cluster 🔥',
+      'Cluster \u{1F525}',
       "Today's puzzle is ready. Can you keep your streak alive?",
       scheduledDate,
       _notificationDetails,
